@@ -26,8 +26,8 @@ struct VertexMesh {
 };
 
 class A16;
-void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
-void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 
 class A16 : public BaseProject {
 protected:
@@ -191,10 +191,10 @@ protected:
 		}
 
 		if (MoveCam) {		
-			FreeCam(deltaT, m, r, View, CarPos, CarYaw, CamPos);
+			FreeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 		}
 		else {
-			GameLogic(deltaT, m, r, View, CarPos, CarYaw, CamPos);
+			GameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 		}
 
 		Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
@@ -207,9 +207,6 @@ protected:
 
 		DSGubo.map(currentImage, &gubo, sizeof(gubo), 0);
 
-		World =
-			glm::translate(glm::mat4(1.0), CarPos) *
-			glm::rotate(glm::mat4(1.0), CarYaw, glm::vec3(0, 1, 0));
 		uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
 		uboCar.mvpMat = Prj * View * World;
 		uboCar.mMat = World;
