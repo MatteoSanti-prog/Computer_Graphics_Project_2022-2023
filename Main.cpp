@@ -124,7 +124,7 @@ protected:
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
 		MApartment.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
-		MRoad.init(this, &VVColor, "Models/Road.obj", OBJ); /**/
+		MRoad.init(this, &VVColor, "Models/road.obj", OBJ); /**/
 		TCity.init(this, "textures/Textures_City.png");
 
 		GameState = 0;
@@ -150,8 +150,7 @@ protected:
 			});
 			
 		DSRoad.init(this, &DSLVColor, { /**/
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}
 			});
 	}
 
@@ -198,7 +197,9 @@ protected:
 		PVColor.bind(commandBuffer);
 		MRoad.bind(commandBuffer); /**/
 		DSRoad.bind(commandBuffer, PMesh, 1, currentImage);
-		
+		vkCmdDrawIndexed(commandBuffer,
+			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0); /**/
+
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment.indices.size()), 1, 0, 0, 0);
 	}
@@ -262,6 +263,7 @@ protected:
 		uboApartment.nMat = glm::inverse(glm::transpose(World));
 		DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
 		
+		World = glm::mat4(1); /**/
 		uboRoad.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
 		uboRoad.mvpMat = Prj * View * World; /**/
 		uboRoad.mMat = World;
