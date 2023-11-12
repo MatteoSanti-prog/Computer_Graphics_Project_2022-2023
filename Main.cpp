@@ -25,6 +25,12 @@ struct VertexMesh {
 	glm::vec2 UV;
 };
 
+struct VertexVColor {
+	glm::vec3 pos; /**/
+	glm::vec3 norm;
+	glm::vec3 color;
+    };
+
 class A16;
 void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
@@ -47,6 +53,12 @@ protected:
 	Texture TCity;
 
 	MeshUniformBlock uboCar, uboApartment;
+	Model<VertexVColor> MRoad; /**/
+	VertexDescriptor VVColor; /**/
+	MeshUniformBlock uboRoad; /**/
+	Pipeline PVColor; /**/
+	DescriptorSetLayout DSLVColor; /**/
+	DescriptorSet DSRoad;
 	GlobalUniformBlock gubo;
 
 	int GameState;
@@ -60,9 +72,9 @@ protected:
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 3;
-		texturesInPool = 2;
-		setsInPool = 3;
+		uniformBlocksInPool = 10; //3,2,3 /**/
+		texturesInPool = 10;
+		setsInPool = 10;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -92,12 +104,27 @@ protected:
 				{0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
 					   sizeof(glm::vec2), UV}
 			});
-
+		
+		DSLVColor.init(this, { /**/
+					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+			});
+		VVColor.init(this, { /**/
+			{0, sizeof(VertexVColor), VK_VERTEX_INPUT_RATE_VERTEX}
+			}, {
+			    {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, pos),
+					   sizeof(glm::vec3), POSITION},
+			    {0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, norm),
+					   sizeof(glm::vec3), NORMAL},
+			    {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, color),
+					   sizeof(glm::vec3), COLOR}
+			});
+		PVColor.init(this, &VVColor, "shaders/VColorVert.spv", "shaders/VColorFrag.spv", { &DSLGubo, &DSLVColor }); /**/
+		
 		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
 		MApartment.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
-		
+		MRoad.init(this, &VVColor, "Models/Road.obj", OBJ); /**/
 		TCity.init(this, "textures/Textures_City.png");
 
 		GameState = 0;
@@ -107,6 +134,7 @@ protected:
 	void pipelinesAndDescriptorSetsInit() {
 		
 		PMesh.create();
+		PVColor.create(); /**/
 		
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -120,14 +148,21 @@ protected:
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
+			
+		DSRoad.init(this, &DSLVColor, { /**/
+					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+					{1, TEXTURE, 0, &TCity}
+			});
 	}
 
 	
 	void pipelinesAndDescriptorSetsCleanup() {
 		
 		PMesh.cleanup();
+		PVColor.cleanup(); /**/
 		DSCar.cleanup();
 		DSApartment.cleanup();
+		DSRoad.cleanup();  /**/
 		DSGubo.cleanup();
 	}
 
@@ -137,11 +172,12 @@ protected:
 
 		MCar.cleanup();
 		MApartment.cleanup();
-
+		MRoad.cleanup(); /**/
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
 
 		PMesh.destroy();
+		PVColor.destroy(); /**/
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -157,6 +193,12 @@ protected:
 
 		MApartment.bind(commandBuffer);
 		DSApartment.bind(commandBuffer, PMesh, 1, currentImage);
+		
+		DSGubo.bind(commandBuffer, PVColor, 0, currentImage); /**/
+		PVColor.bind(commandBuffer);
+		MRoad.bind(commandBuffer); /**/
+		DSRoad.bind(commandBuffer, PMesh, 1, currentImage);
+		
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment.indices.size()), 1, 0, 0, 0);
 	}
@@ -219,6 +261,12 @@ protected:
 		uboApartment.mMat = World;
 		uboApartment.nMat = glm::inverse(glm::transpose(World));
 		DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
+		
+		uboRoad.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
+		uboRoad.mvpMat = Prj * View * World; /**/
+		uboRoad.mMat = World;
+		uboRoad.nMat = glm::inverse(glm::transpose(World));
+		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 	}
 };
 
