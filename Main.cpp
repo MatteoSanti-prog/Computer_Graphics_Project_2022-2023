@@ -58,7 +58,7 @@ protected:
 	MeshUniformBlock uboRoad; /**/
 	Pipeline PVColor; /**/
 	DescriptorSetLayout DSLVColor; /**/
-	DescriptorSet DSRoad;
+	DescriptorSet DSRoad; /**/
 	GlobalUniformBlock gubo;
 
 	int GameState;
@@ -192,16 +192,15 @@ protected:
 
 		MApartment.bind(commandBuffer);
 		DSApartment.bind(commandBuffer, PMesh, 1, currentImage);
+		vkCmdDrawIndexed(commandBuffer,
+			static_cast<uint32_t>(MApartment.indices.size()), 1, 0, 0, 0);
 		
 		DSGubo.bind(commandBuffer, PVColor, 0, currentImage); /**/
 		PVColor.bind(commandBuffer);
 		MRoad.bind(commandBuffer); /**/
-		DSRoad.bind(commandBuffer, PMesh, 1, currentImage);
+		DSRoad.bind(commandBuffer, PVColor, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0); /**/
-
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MApartment.indices.size()), 1, 0, 0, 0);
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -263,7 +262,7 @@ protected:
 		uboApartment.nMat = glm::inverse(glm::transpose(World));
 		DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
 		
-		World = glm::mat4(1); /**/
+		World = glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0.0f, -10.0f)); /**/
 		uboRoad.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
 		uboRoad.mvpMat = Prj * View * World; /**/
 		uboRoad.mMat = World;
