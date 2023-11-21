@@ -59,19 +59,19 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	const float MinSpeedBackward = -3.0f;
 	
 	const float AccFactorForward = 5.0f;
-    const float AccFactorBackward = -1.0f;
-	const float FrictionFactor = 0.5f;
-	const float MotorBrakeFactor = 3.0f;
+    const float AccFactorBackward = -2.5f;
+	const float FrictionFactor = 3.5f;
+	const float MotorBrakeFactor = 8.5f;
 	
 	static float MaxRotSpeed = glm::radians(120.0f);
     static float RotSpeed = glm::radians(0.0f);
     static float RotDecFactor = 1.0f;
     static float PowerSteeringFactor = 3.5f;
-    static float RotAccFactor = 5.0f;
+    static float RotAccFactor = 4.5f;
     
 	static float MovSpeed = 0.0f;
 
-	float AccFactor, DecFactor, Acceleration, RotAcc, RotDec;
+	float AccFactor, DecFactor, Acceleration, RotAcc, RotDec, NormMovSpeed;
 
 	static float LocalCarYaw = StartingDirection;
 	static glm::vec3 LocalCamPos, LocalCarPos;
@@ -91,8 +91,10 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	CamPitch += -RotSpeed * r.x * deltaT;
 	CamPitch = CamPitch < MinPitch ? MinPitch :
 		(CamPitch > MaxPitch ? MaxPitch : CamPitch);
+    
+    NormMovSpeed = MovSpeed >= 0 ? MovSpeed/MaxSpeedForward : MovSpeed/MinSpeedBackward;
 
-    DecFactor = m.z != 0 ? -(MovSpeed / MaxSpeedForward) * FrictionFactor : -(MovSpeed / MaxSpeedForward) * (FrictionFactor + MotorBrakeFactor);
+    DecFactor = m.z != 0 ? -NormMovSpeed * FrictionFactor : -NormMovSpeed * (FrictionFactor + MotorBrakeFactor);
 
 	AccFactor = m.z > 0.0f ? AccFactorForward :
 		(m.z < 0.0f ? AccFactorBackward : 0.0f);
