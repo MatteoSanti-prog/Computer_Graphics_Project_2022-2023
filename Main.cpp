@@ -1,6 +1,6 @@
 #include "Starter.hpp"
 #include "Controller.hpp"
-
+#include "models/main_environment.hpp"
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -18,6 +18,11 @@ struct GlobalUniformBlock {
 	alignas(16) glm::vec3 eyePos;
 };
 
+struct EnvUniformBufferObject { //Env = environment object defined in main_environment.hpp
+	alignas(16) glm::mat4 mvpMat;
+	alignas(16) glm::mat4 mMat;
+	alignas(16) glm::mat4 nMat;
+};
 
 struct VertexMesh {
 	glm::vec3 pos;
@@ -35,27 +40,31 @@ class A16;
 void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 
+void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx);
+
 class A16 : public BaseProject {
 protected:
 
 	float Ar;
 
-	DescriptorSetLayout DSLGubo, DSLMesh;
+	DescriptorSetLayout DSLGubo, DSLMesh, DSLEnv;
 	
 	VertexDescriptor VMesh;
 	
-	Pipeline PMesh;
+	Pipeline PMesh, PEnv;
 	
-	Model<VertexMesh> MCar, MApartment;
+	Model<VertexMesh> MCar, MApartment, MEnv;
 
-	DescriptorSet DSGubo, DSCar, DSApartment;
+	DescriptorSet DSGubo, DSCar, DSApartment, DSEnv;
 
-	Texture TCity;
+	Texture TCity, TEnv;
 
 	MeshUniformBlock uboCar, uboApartment;
 	Model<VertexVColor> MRoad; /**/
 	VertexDescriptor VVColor; /**/
 	MeshUniformBlock uboRoad; /**/
+	EnvUniformBufferObject uboEnv{};
+	
 	Pipeline PVColor; /**/
 	DescriptorSetLayout DSLVColor; /**/
 	DescriptorSet DSRoad; /**/
@@ -89,6 +98,12 @@ protected:
 			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
 			{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
+
+		DSLEnv.init(this, {
+			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+			{1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+			{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+		});
 
 		DSLGubo.init(this, {
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
@@ -124,8 +139,17 @@ protected:
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
 		MApartment.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
-		MRoad.init(this, &VVColor, "Models/road.obj", OBJ); /**/
+		MRoad.init(this, &VVColor, "Models/prova.obj", OBJ); /**/
 		TCity.init(this, "textures/Textures_City.png");
+		
+		//environment object
+		createEnvironment(MEnv.vertices, MEnv.indices);
+		MEnv.initMesh(this, &VMesh);
+		TEnv.init(this, "textures/Textures_City.png");
+		PEnv.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", {&DSLEnv});
+		PEnv.setAdvancedFeatures(VK_COMPARE_OP_LESS, VK_POLYGON_MODE_FILL,
+ 								    VK_CULL_MODE_NONE, false);
+
 
 		GameState = 0;
 		MoveCam = true;
@@ -152,6 +176,14 @@ protected:
 		DSRoad.init(this, &DSLVColor, { /**/
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}
 			});
+			
+		PEnv.create();
+
+		DSEnv.init(this, &DSLEnv, {
+					{0, UNIFORM, sizeof(EnvUniformBufferObject), nullptr},
+					{1, UNIFORM, sizeof(GlobalUniformBlock), nullptr},
+					{2, TEXTURE, 0, &TEnv}
+});
 	}
 
 	
@@ -163,6 +195,10 @@ protected:
 		DSApartment.cleanup();
 		DSRoad.cleanup();  /**/
 		DSGubo.cleanup();
+		
+		//environment
+		PEnv.cleanup();
+		DSEnv.cleanup();
 	}
 
 	void localCleanup() {
@@ -178,6 +214,12 @@ protected:
 
 		PMesh.destroy();
 		PVColor.destroy(); /**/
+		
+		//environment
+		TEnv.cleanup();
+		MEnv.cleanup();
+		DSLEnv.cleanup();
+		PEnv.destroy();	
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -202,6 +244,14 @@ protected:
 		DSRoad.bind(commandBuffer, PVColor, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0); /**/
+			
+		//environment	
+			PEnv.bind(commandBuffer);
+			MEnv.bind(commandBuffer);
+			DSEnv.bind(commandBuffer, PEnv, currentImage);		
+			vkCmdDrawIndexed(commandBuffer,
+					static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -233,12 +283,10 @@ protected:
 			break;
 		}
 
-		if (MoveCam) {		
+		if (MoveCam)		
 			FreeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-		}
-		else {
+		else
 			GameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-		}
 
 		Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
 		Prj[1][1] *= -1;
@@ -269,7 +317,12 @@ protected:
 		uboRoad.mMat = World;
 		uboRoad.nMat = glm::inverse(glm::transpose(World));
 		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
+		
+		//environment
+		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+		//DSEnv.map(currentImage, &gubo, sizeof(gubo), 1);
 	}
+	void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx);
 };
 
 

@@ -1,43 +1,45 @@
-void Environment::createEnvironment() {
+
+
+void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
 	//X Y Z
-	vPos.push_back(-15f); vPos.push_back(15f); vPos.push_back(0f); //A	//0
-	vPos.push_back(15f); vPos.push_back(15f); vPos.push_back(0f); //B
-	vPos.push_back(-15f); vPos.push_back(-15f); vPos.push_back(0f); //C
-	vPos.push_back(15f); vPos.push_back(-15f); vPos.push_back(0f); //D
+	vPos.push_back(-15); vPos.push_back(15); vPos.push_back(0); //A	//0
+	vPos.push_back(15); vPos.push_back(15); vPos.push_back(0); //B
+	vPos.push_back(-15); vPos.push_back(-15); vPos.push_back(0); //C
+	vPos.push_back(15); vPos.push_back(-15); vPos.push_back(0); //D
 
-	vPos.push_back(8f); vPos.push_back(-8f); vPos.push_back(1f); //E	//4
-	vPos.push_back(6f); vPos.push_back(-8f); vPos.push_back(1f); //H
-	vPos.push_back(6f); vPos.push_back(0f); vPos.push_back(1f); //G
-	vPos.push_back(8f); vPos.push_back(0f); vPos.push_back(1f); //F
+	vPos.push_back(8); vPos.push_back(-8); vPos.push_back(1); //E	//4
+	vPos.push_back(6); vPos.push_back(-8); vPos.push_back(1); //H
+	vPos.push_back(6); vPos.push_back(0); vPos.push_back(1); //G
+	vPos.push_back(8); vPos.push_back(0); vPos.push_back(1); //F
 
-	vPos.push_back(6f); vPos.push_back(1.8f); vPos.push_back(1f); //J	//8
-	vPos.push_back(-5.4f); vPos.push_back(1.8f); vPos.push_back(1f); //R
-	vPos.push_back(-5.4f); vPos.push_back(-0.2f); vPos.push_back(1f); //Q //AND G
+	vPos.push_back(6); vPos.push_back(1.8); vPos.push_back(1); //J	//8
+	vPos.push_back(-5.4); vPos.push_back(1.8); vPos.push_back(1); //R
+	vPos.push_back(-5.4); vPos.push_back(-0.2); vPos.push_back(1); //Q //AND G
 
-	vPos.push_back(-5.4f); vPos.push_back(-2.3f); vPos.push_back(1f); //N	//11
-	vPos.push_back(-7.4f); vPos.push_back(-2.3f); vPos.push_back(1f); //K
-	vPos.push_back(-7.4f); vPos.push_back(7.4f); vPos.push_back(1f); //O
-	vPos.push_back(-5.4f); vPos.push_back(7.4f); vPos.push_back(1f); //P
+	vPos.push_back(-5.4); vPos.push_back(-2.3); vPos.push_back(1); //N	//11
+	vPos.push_back(-7.4); vPos.push_back(-2.3); vPos.push_back(1); //K
+	vPos.push_back(-7.4); vPos.push_back(7.4); vPos.push_back(1); //O
+	vPos.push_back(-5.4); vPos.push_back(7.4); vPos.push_back(1); //P
 	
 	//LOWER PART
-	vPos.push_back(-15f); vPos.push_back(15f); vPos.push_back(-1f); //A'	//15
-	vPos.push_back(15f); vPos.push_back(15f); vPos.push_back(-10f); //B'
-	vPos.push_back(-15f); vPos.push_back(-15f); vPos.push_back(-10f); //C'
-	vPos.push_back(15f); vPos.push_back(-15f); vPos.push_back(-10f); //D'
+	vPos.push_back(-15); vPos.push_back(15); vPos.push_back(-1); //A'	//15
+	vPos.push_back(15); vPos.push_back(15); vPos.push_back(-10); //B'
+	vPos.push_back(-15); vPos.push_back(-15); vPos.push_back(-10); //C'
+	vPos.push_back(15); vPos.push_back(-15); vPos.push_back(-10); //D'
 
-	vPos.push_back(8f); vPos.push_back(-8f); vPos.push_back(-1f); //E'	//19
-	vPos.push_back(6f); vPos.push_back(-8f); vPos.push_back(-1f); //H'
-	vPos.push_back(6f); vPos.push_back(0f); vPos.push_back(-1f); //G'
-	vPos.push_back(8f); vPos.push_back(0f); vPos.push_back(-1f); //F'
+	vPos.push_back(8); vPos.push_back(-8); vPos.push_back(-1); //E'	//19
+	vPos.push_back(6); vPos.push_back(-8); vPos.push_back(-1); //H'
+	vPos.push_back(6); vPos.push_back(0); vPos.push_back(-1); //G'
+	vPos.push_back(8); vPos.push_back(0); vPos.push_back(-1); //'
 
-	vPos.push_back(6f); vPos.push_back(1.8f); vPos.push_back(-1f); //J'	//23
-	vPos.push_back(-5.4f); vPos.push_back(1.8f); vPos.push_back(-1f); //R'
-	vPos.push_back(-5.4f); vPos.push_back(-0.2f); vPos.push_back(-1f); //Q' //AND G'
+	vPos.push_back(6); vPos.push_back(1.8); vPos.push_back(-1); //J'	//23
+	vPos.push_back(-5.4); vPos.push_back(1.8); vPos.push_back(-1); //R'
+	vPos.push_back(-5.4); vPos.push_back(-0.2); vPos.push_back(-1); //Q' //AND G'
 
-	vPos.push_back(-5.4f); vPos.push_back(-2.3f); vPos.push_back(-1f); //N'	//26
-	vPos.push_back(-7.4f); vPos.push_back(-2.3f); vPos.push_back(-1f); //K'
-	vPos.push_back(-7.4f); vPos.push_back(7.4f); vPos.push_back(-1f); //O'
-	vPos.push_back(-5.4f); vPos.push_back(7.4f); vPos.push_back(-1f); //P'	//29
+	vPos.push_back(-5.4); vPos.push_back(-2.3); vPos.push_back(-1); //N'	//26
+	vPos.push_back(-7.4); vPos.push_back(-2.3); vPos.push_back(-1); //K'
+	vPos.push_back(-7.4); vPos.push_back(7.4); vPos.push_back(-1); //O'
+	vPos.push_back(-5.4); vPos.push_back(7.4); vPos.push_back(-1); //P'	//29
 	
 	//ABCD 0 1 2 3
 	vIdx.push_back(0); vIdx.push_back(1); vIdx.push_back(2); //ABC
