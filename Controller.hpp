@@ -59,9 +59,9 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	const float MinSpeedBackward = -10.0f;
 	
 	const float AccFactorForward = 2.0f;
-	const float AccFactorBackward = 1.0f;
+	const float AccFactorBackward = -1.0f;
 	const float DecFactorForward = 0.75f;
-	const float DecFactorBackward = 0.5f;
+	const float DecFactorBackward = -0.5f;
 	
 	const float RotSpeed = glm::radians(120.0f);
 	static float MovSpeed = 0.0f;
