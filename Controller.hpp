@@ -47,17 +47,35 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	// Camera target height and distance
 	const float CamHeight = 1.0f;
 	const float CamDist = 5.0f;
+<<<<<<< Updated upstream
 	// Camera Pitch limits
 	const float MinPitch = glm::radians(-8.75f);
 	const float MaxPitch = glm::radians(60.0f);
 	// Rotation and motion speed
 	const float RotSpeed = glm::radians(120.0f);
 	const float MovSpeed = 2.0f;
+=======
+	
+	const float MinPitch = glm::radians(-3.75f);
+	const float MaxPitch = glm::radians(45.0f);
+	const float MaxSpeedForward = 30.0f;
+	const float MinSpeedBackward = -10.0f;
+	
+	const float AccFactorForward = 2.0f;
+	const float AccFactorBackward = -1.0f;
+    const float FrictionFactor = 0.1f;
+    const float MotorBrakeFactor = 0.45f;
+    
+	
+	const float RotSpeed = glm::radians(75.0f);
+	static float MovSpeed = 0.0f;
+>>>>>>> Stashed changes
 
 	// Game Logic implementation
 
 	// yaw, pitch sono relativi alla telecamera, mentre yawPlayer è lo yaw del personaggio
 	static float LocalCarYaw = StartingDirection;
+    static float NewLocalCarYaw = LocalCarYaw;
 	static glm::vec3 LocalCamPos, LocalCarPos;
 	static float CamYaw = StartingDirection, CamPitch;
 	static glm::vec3 CamPosOld = StartingPosition, CamPosNew;
@@ -86,12 +104,32 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	CamPitch = CamPitch < MinPitch ? MinPitch :
 		(CamPitch > MaxPitch ? MaxPitch : CamPitch);
 
+<<<<<<< Updated upstream
 	CamYaw += -RotSpeed * r.y * deltaT;
 
 	if (m.z == 1) {
 		LocalCarPos += uz * MovSpeed * m.z * deltaT;
 		LocalCarYaw = CamYaw + glm::radians(180.0f);
 	}
+=======
+    DecFactor = m.z != 0.0f ? -MovSpeed * FrictionFactor : -MovSpeed * (FrictionFactor + MotorBrakeFactor);
+
+	AccFactor = m.z > 0.0f ? AccFactorForward :
+		(m.z < 0.0f ? AccFactorBackward : 0.0f);
+
+	Acceleration = AccFactor + DecFactor;
+    
+	MovSpeed = MovSpeed > MaxSpeedForward ? MaxSpeedForward :
+		(MovSpeed < MinSpeedBackward ? MinSpeedBackward : MovSpeed + Acceleration * deltaT);
+    
+	LocalCarPos += uz * MovSpeed * deltaT;
+    
+    float a = MovSpeed >= 0.0f ? (MovSpeed/MaxSpeedForward) : (MovSpeed/MinSpeedBackward);
+    
+    NewLocalCarYaw += -RotSpeed * r.y * deltaT * log(a);
+    
+    LocalCarYaw = glm::mix(LocalCarYaw, NewLocalCarYaw, a);  // LocalCarYaw * (1-a) + NewLocalCarYaw * a
+>>>>>>> Stashed changes
 
 	/*Qui creo la View Matrix*/
 	/*
