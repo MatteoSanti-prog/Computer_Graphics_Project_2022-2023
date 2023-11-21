@@ -53,24 +53,29 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	const float CamHeight = 1.0f;
 	const float CamDist = 5.0f;
 	
-	const float MinPitch = glm::radians(-3.75f);
-	const float MaxPitch = glm::radians(45.0f);
-	const float MaxSpeedForward = 30.0f;
-	const float MinSpeedBackward = -10.0f;
+	const float MinPitch = glm::radians(10.0f);
+	const float MaxPitch = glm::radians(30.0f);
+	const float MaxSpeedForward = 15.0f;
+	const float MinSpeedBackward = -3.0f;
 	
-	const float AccFactorForward = 2.0f;
-	const float AccFactorBackward = 1.0f;
-	const float DecFactorForward = 0.75f;
-	const float DecFactorBackward = 0.5f;
+	const float AccFactorForward = 5.0f;
+    const float AccFactorBackward = -1.0f;
+	const float FrictionFactor = 0.5f;
+	const float MotorBrakeFactor = 1.0f;
 	
-	const float RotSpeed = glm::radians(120.0f);
+	static float MaxRotSpeed = glm::radians(120.0f);
+    static float RotSpeed = glm::radians(0.0f);
+    static float RotDecFactor = 1.0f;
+    static float PowerSteeringFactor = 3.5f;
+    static float RotAccFactor = 5.0f;
+    
 	static float MovSpeed = 0.0f;
 
-	float AccFactor, DecFactor, Acceleration;
+	float AccFactor, DecFactor, Acceleration, RotAcc, RotDec;
 
 	static float LocalCarYaw = StartingDirection;
 	static glm::vec3 LocalCamPos, LocalCarPos;
-	static float CamPitch;
+	static float CamPitch = glm::radians(10.0f);
 	static glm::vec3 CamPosOld = StartingPosition, CamPosNew;
 
 	glm::vec3 Target;
@@ -87,21 +92,28 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	CamPitch = CamPitch < MinPitch ? MinPitch :
 		(CamPitch > MaxPitch ? MaxPitch : CamPitch);
 
-	DecFactor = MovSpeed > 0.01f ? DecFactorForward :
-		(MovSpeed < 0.01f ? DecFactorBackward : 0.0f);
+    DecFactor = m.z != 0 ? -MovSpeed * FrictionFactor : -MovSpeed * (FrictionFactor + MotorBrakeFactor);
 
 	AccFactor = m.z > 0.0f ? AccFactorForward :
 		(m.z < 0.0f ? AccFactorBackward : 0.0f);
 
-	Acceleration = AccFactor - DecFactor;
-	MovSpeed += Acceleration * deltaT;
+	Acceleration = AccFactor + DecFactor;
+    
 	MovSpeed = MovSpeed > MaxSpeedForward ? MaxSpeedForward :
-		(MovSpeed < MinSpeedBackward ? MinSpeedBackward : MovSpeed);
+		(MovSpeed < MinSpeedBackward ? MinSpeedBackward : MovSpeed + Acceleration * deltaT);
+    
 	LocalCarPos += uz * MovSpeed * deltaT;
 
-	if (MovSpeed < -0.1f || MovSpeed > 0.1f ) {
-		LocalCarYaw += -RotSpeed * r.y * deltaT;
-	}
+    RotDec = r.y != 0 ? -RotSpeed * RotDecFactor : -RotSpeed * (RotDecFactor + PowerSteeringFactor);
+    
+    RotAcc = r.y * RotAccFactor + RotDec;
+    
+    RotSpeed = RotSpeed > MaxRotSpeed ? MaxRotSpeed :
+        (RotSpeed < -MaxRotSpeed ? -MaxRotSpeed : RotSpeed + RotAcc * deltaT);
+    
+    float a = MovSpeed >= 0 ? (MovSpeed/MaxSpeedForward) : (MovSpeed/MinSpeedBackward);
+    
+    LocalCarYaw = glm::mix(LocalCarYaw, LocalCarYaw - RotSpeed * deltaT, a);
 
 	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), LocalCarYaw, glm::vec3(0, 1, 0));
 
