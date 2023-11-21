@@ -174,6 +174,7 @@ protected:
 		MRoad.cleanup(); /**/
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
+		DSLVColor.cleanup();
 
 		PMesh.destroy();
 		PVColor.destroy(); /**/
