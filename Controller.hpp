@@ -61,7 +61,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	const float AccFactorForward = 5.0f;
     const float AccFactorBackward = -1.0f;
 	const float FrictionFactor = 0.5f;
-	const float MotorBrakeFactor = 1.0f;
+	const float MotorBrakeFactor = 3.0f;
 	
 	static float MaxRotSpeed = glm::radians(120.0f);
     static float RotSpeed = glm::radians(0.0f);
@@ -92,7 +92,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	CamPitch = CamPitch < MinPitch ? MinPitch :
 		(CamPitch > MaxPitch ? MaxPitch : CamPitch);
 
-    DecFactor = m.z != 0 ? -MovSpeed * FrictionFactor : -MovSpeed * (FrictionFactor + MotorBrakeFactor);
+    DecFactor = m.z != 0 ? -(MovSpeed / MaxSpeedForward) * FrictionFactor : -(MovSpeed / MaxSpeedForward) * (FrictionFactor + MotorBrakeFactor);
 
 	AccFactor = m.z > 0.0f ? AccFactorForward :
 		(m.z < 0.0f ? AccFactorBackward : 0.0f);
