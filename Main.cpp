@@ -1,6 +1,5 @@
 #include "Starter.hpp"
 #include "Controller.hpp"
-#include "models/main_environment.hpp"
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -40,10 +39,8 @@ class A16;
 void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 
-void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx);
-
 class A16 : public BaseProject {
-protected:
+	protected:
 
 	float Ar;
 
@@ -53,7 +50,12 @@ protected:
 	
 	Pipeline PMesh, PEnv;
 	
-	Model<VertexMesh> MCar, MApartment, MEnv;
+	Model<VertexMesh> MCar, MApartment;
+	
+	//environment
+	Model<VertexMesh> MEnv;
+	//std::vector<float> vPos;
+	//std::vector<int> vIdx;
 
 	DescriptorSet DSGubo, DSCar, DSApartment, DSEnv;
 
@@ -248,7 +250,7 @@ protected:
 		//environment	
 			PEnv.bind(commandBuffer);
 			MEnv.bind(commandBuffer);
-			DSEnv.bind(commandBuffer, PEnv, currentImage);		
+			DSEnv.bind(commandBuffer, PEnv, 1, currentImage);		
 			vkCmdDrawIndexed(commandBuffer,
 					static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
 
@@ -322,9 +324,10 @@ protected:
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
 		//DSEnv.map(currentImage, &gubo, sizeof(gubo), 1);
 	}
-	void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx);
+	void createEnvironment(MEnv.vPos, Menv.vIdx);
 };
 
+#include "main_environment.hpp"
 
 int main() {
 	A16 app;

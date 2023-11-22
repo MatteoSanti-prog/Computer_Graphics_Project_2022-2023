@@ -1,6 +1,6 @@
 
 
-void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
+void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
 	//X Y Z
 	vPos.push_back(-15); vPos.push_back(15); vPos.push_back(0); //A	//0
 	vPos.push_back(15); vPos.push_back(15); vPos.push_back(0); //B
