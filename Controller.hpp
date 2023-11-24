@@ -69,7 +69,7 @@ void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
 
 	/*Update the output variables (car position and car direction are fixed)*/
 	CamPos = LocalCamPos;
-	CarPos = glm::vec3(0.0f);
+	CarPos = glm::vec3(0.0f, 0.0, 50.0f);
 	CarYaw = glm::radians(180.0f);
 
 	/*Create a World Matrix for the car*/
@@ -94,7 +94,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	const float lambda = 10.0f;
 	
 	/*Constants used for setting the initial position and the initial direction of the car*/
-	const glm::vec3 StartingPosition = glm::vec3(10.0f, 0.0, 10.0f);
+	const glm::vec3 StartingPosition = glm::vec3(0.0f);
 	const float StartingDirection = glm::radians(0.0f);
 	
 	/*Constants representing the height and the distance of the camera from the car*/
@@ -104,6 +104,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	/*Constants used to bind pitch of the camera*/
 	const float MinPitch = glm::radians(10.0f);
 	const float MaxPitch = glm::radians(30.0f);
+	const float RotSpeedPitch = glm::radians(20.0f);
 
 	/*Constants used to bind translational speed and acceleration of the car*/
 	const float SpeedThreshold = 0.12f;
@@ -138,7 +139,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 
 	/*Static variables used to store current positon and direction both for the car and for the camera*/
 	static float LocalCarYaw = StartingDirection;
-	static glm::vec3 LocalCamPos, LocalCarPos;
+	static glm::vec3 LocalCamPos, LocalCarPos = glm::vec3(0.0f, 0.0, 50.0f);
 	static float CamPitch = glm::radians(10.0f);
 
 	/*Static variables used to perform dumping*/
@@ -152,7 +153,7 @@ void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, gl
 	glm::vec3 uz = glm::vec3(glm::rotate(glm::mat4(1), LocalCarYaw, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1));
 
 	/*Update and bind the pitch angle of the camera*/
-	CamPitch += -RotSpeed * r.x * deltaT;
+	CamPitch += -RotSpeedPitch * r.x * deltaT;
 	CamPitch = CamPitch < MinPitch ? MinPitch :
 		(CamPitch > MaxPitch ? MaxPitch : CamPitch);
 
