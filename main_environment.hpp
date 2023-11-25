@@ -1,6 +1,10 @@
+#include <iostream>
+#include "environment.h"
+
+using namespace std;
 
 
-void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
+void createEnvironment(vPos, vIdx) {
 	//X Y Z
 	vPos.push_back({{-15,15,0}, {0,0,1}, {0,0}});
 	//vPos.push_back(-15); vPos.push_back(15); vPos.push_back(0); //A	//0

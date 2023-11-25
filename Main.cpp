@@ -1,5 +1,8 @@
+#include <iostream>
 #include "Starter.hpp"
 #include "Controller.hpp"
+//#include "main_environment.hpp" //this include can't be put above because it gives errors
+#include "environment.h"
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -202,10 +205,6 @@ class A16 : public BaseProject {
 		
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
-			});
-			
-		DSRoad.init(this, &DSLVColor, { 
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}
 			});
 			
 		PEnv.create();
@@ -441,7 +440,8 @@ class A16 : public BaseProject {
 	}
 
 };
-#include "main_environment.hpp" //this include can't be put above because it gives errors
+
+
 
 int main() {
 	A16 app;
