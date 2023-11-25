@@ -30,7 +30,7 @@ struct VertexMesh {
 };
 
 struct VertexVColor {
-	glm::vec3 pos; /**/
+	glm::vec3 pos; 
 	glm::vec3 norm;
 	glm::vec3 color;
     };
@@ -54,22 +54,22 @@ class A16 : public BaseProject {
 	
 	//environment
 	Model<VertexMesh> MEnv;
-	//std::vector<float> vPos;
-	//std::vector<int> vIdx;
-
-	DescriptorSet DSGubo, DSCar, DSApartment, DSEnv;
-
-	Texture TCity, TEnv;
+	EnvUniformBufferObject uboEnv{};
+	DescriptorSet DSEnv;
+	Texture TEnv;
+	
+	DescriptorSet DSGubo, DSCar, DSApartment;
+	Texture TCity;
 
 	MeshUniformBlock uboCar, uboApartment;
-	Model<VertexVColor> MRoad; /**/
-	VertexDescriptor VVColor; /**/
-	MeshUniformBlock uboRoad; /**/
-	EnvUniformBufferObject uboEnv{};
+	Model<VertexVColor> MRoad; 
+	VertexDescriptor VVColor; 
+	MeshUniformBlock uboRoad; 
 	
-	Pipeline PVColor; /**/
-	DescriptorSetLayout DSLVColor; /**/
-	DescriptorSet DSRoad; /**/
+	//global
+	Pipeline PVColor; 
+	DescriptorSetLayout DSLVColor; 
+	DescriptorSet DSRoad; 
 	GlobalUniformBlock gubo;
 
 	int GameState;
@@ -83,7 +83,7 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 10; //3,2,3 /**/
+		uniformBlocksInPool = 10; //3,2,3 
 		texturesInPool = 10;
 		setsInPool = 10;
 
@@ -122,10 +122,10 @@ class A16 : public BaseProject {
 					   sizeof(glm::vec2), UV}
 			});
 		
-		DSLVColor.init(this, { /**/
+		DSLVColor.init(this, { 
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
 			});
-		VVColor.init(this, { /**/
+		VVColor.init(this, { 
 			{0, sizeof(VertexVColor), VK_VERTEX_INPUT_RATE_VERTEX}
 			}, {
 			    {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, pos),
@@ -135,13 +135,13 @@ class A16 : public BaseProject {
 			    {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, color),
 					   sizeof(glm::vec3), COLOR}
 			});
-		PVColor.init(this, &VVColor, "shaders/VColorVert.spv", "shaders/VColorFrag.spv", { &DSLGubo, &DSLVColor }); /**/
+		PVColor.init(this, &VVColor, "shaders/VColorVert.spv", "shaders/VColorFrag.spv", { &DSLGubo, &DSLVColor }); 
 		
 		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
 		MApartment.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
-		MRoad.init(this, &VVColor, "Models/prova.obj", OBJ); /**/
+		MRoad.init(this, &VVColor, "Models/prova.obj", OBJ); 
 		TCity.init(this, "textures/Textures_City.png");
 		
 		//environment object
@@ -160,7 +160,7 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsInit() {
 		
 		PMesh.create();
-		PVColor.create(); /**/
+		PVColor.create(); 
 		
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -175,7 +175,7 @@ class A16 : public BaseProject {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
 			
-		DSRoad.init(this, &DSLVColor, { /**/
+		DSRoad.init(this, &DSLVColor, { 
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}
 			});
 			
@@ -192,10 +192,10 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsCleanup() {
 		
 		PMesh.cleanup();
-		PVColor.cleanup(); /**/
+		PVColor.cleanup(); 
 		DSCar.cleanup();
 		DSApartment.cleanup();
-		DSRoad.cleanup();  /**/
+		DSRoad.cleanup();  
 		DSGubo.cleanup();
 		
 		//environment
@@ -209,13 +209,13 @@ class A16 : public BaseProject {
 
 		MCar.cleanup();
 		MApartment.cleanup();
-		MRoad.cleanup(); /**/
+		MRoad.cleanup(); 
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
 		DSLVColor.cleanup();
 
 		PMesh.destroy();
-		PVColor.destroy(); /**/
+		PVColor.destroy(); 
 		
 		//environment
 		TEnv.cleanup();
@@ -240,19 +240,19 @@ class A16 : public BaseProject {
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment.indices.size()), 1, 0, 0, 0);
 		
-		DSGubo.bind(commandBuffer, PVColor, 0, currentImage); /**/
+		DSGubo.bind(commandBuffer, PVColor, 0, currentImage); 
 		PVColor.bind(commandBuffer);
-		MRoad.bind(commandBuffer); /**/
+		MRoad.bind(commandBuffer); 
 		DSRoad.bind(commandBuffer, PVColor, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0); /**/
+			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0); 
 			
 		//environment	
-			PEnv.bind(commandBuffer);
-			MEnv.bind(commandBuffer);
-			DSEnv.bind(commandBuffer, PEnv, 1, currentImage);		
-			vkCmdDrawIndexed(commandBuffer,
-					static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+		PEnv.bind(commandBuffer);
+		MEnv.bind(commandBuffer);
+		DSEnv.bind(commandBuffer, PEnv, 1, currentImage);		
+		vkCmdDrawIndexed(commandBuffer,
+				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
 
 	}
 
@@ -313,21 +313,24 @@ class A16 : public BaseProject {
 		uboApartment.nMat = glm::inverse(glm::transpose(World));
 		DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
 		
-		World = glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0.0f, -10.0f)); /**/
+		World = glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0.0f, -10.0f)); 
 		uboRoad.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
-		uboRoad.mvpMat = Prj * View * World; /**/
+		uboRoad.mvpMat = Prj * View * World; 
 		uboRoad.mMat = World;
 		uboRoad.nMat = glm::inverse(glm::transpose(World));
 		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 		
 		//environment
+		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)); 
+		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
+		uboEnv.mvpMat = Prj * View * World; 
+		uboEnv.mMat = World;
+		uboEnv.nMat = glm::inverse(glm::transpose(World));
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
-		//DSEnv.map(currentImage, &gubo, sizeof(gubo), 1);
 	}
-	void createEnvironment(MEnv.vPos, Menv.vIdx);
-};
 
-#include "main_environment.hpp"
+};
+#include "main_environment.hpp" //this include can't be put above because it gives errors
 
 int main() {
 	A16 app;
