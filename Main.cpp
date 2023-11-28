@@ -418,7 +418,7 @@ class A16 : public BaseProject {
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
 
 		//environment
-		World = glm::mat4(1.0); 
+		World = glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
 		uboEnv.mvpMat = Prj * View * World; 
 		uboEnv.mMat = World;
