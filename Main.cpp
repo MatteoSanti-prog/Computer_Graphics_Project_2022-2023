@@ -1,8 +1,9 @@
-#include <iostream>
+
 #include "Starter.hpp"
 #include "Controller.hpp"
-//#include "main_environment.hpp" //this include can't be put above because it gives errors
-#include "environment.h"
+
+//#include "environment.h"
+//#include <iostream>
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -20,11 +21,6 @@ struct GlobalUniformBlock {
 	alignas(16) glm::vec3 eyePos;
 };
 
-struct EnvUniformBufferObject { //Env = environment object defined in main_environment.hpp
-	alignas(16) glm::mat4 mvpMat;
-	alignas(16) glm::mat4 mMat;
-	alignas(16) glm::mat4 nMat;
-};
 
 struct VertexMesh {
 	glm::vec3 pos;
@@ -32,7 +28,7 @@ struct VertexMesh {
 	glm::vec2 UV;
 };
 
-struct VertexVColor {
+struct VertexEnv {
 	glm::vec3 pos; 
 	glm::vec3 norm;
 	glm::vec3 color;
@@ -47,11 +43,11 @@ class A16 : public BaseProject {
 
 	float Ar;
 
-	DescriptorSetLayout DSLGubo, DSLMesh, DSLEnv;
+	DescriptorSetLayout DSLGubo, DSLMesh;
 	
 	VertexDescriptor VMesh;
 	
-	Pipeline PMesh, PEnv;
+	Pipeline PMesh;
 	
 	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7;
 
@@ -61,12 +57,18 @@ class A16 : public BaseProject {
 
 	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7;
 
-	//environment
-	Model<VertexMesh> MEnv;
-	EnvUniformBufferObject uboEnv{};
-	DescriptorSet DSEnv;
-	Texture TEnv;
 	GlobalUniformBlock gubo;
+		
+	//environment
+	DescriptorSetLayout DSLEnv;
+	VertexDescriptor VEnv;
+	Pipeline PEnv;
+	Model<VertexEnv> MEnv;
+	MeshUniformBlock uboEnv;
+	DescriptorSet DSEnv;
+	//Texture TEnv; //al momento non ci serve
+	
+
 
 	int GameState;
 	bool MoveCam;
@@ -79,10 +81,10 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 10;
+		uniformBlocksInPool = 11;
 		texturesInPool = 9;
 
-		setsInPool = 10;
+		setsInPool = 11;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -97,12 +99,6 @@ class A16 : public BaseProject {
 			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
 			{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
-
-		DSLEnv.init(this, {
-			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
-			{1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-			{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-		});
 
 		DSLGubo.init(this, {
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
@@ -119,20 +115,19 @@ class A16 : public BaseProject {
 					   sizeof(glm::vec2), UV}
 			});
 		
-		DSLVColor.init(this, { 
+		DSLEnv.init(this, { 
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
 			});
-		VVColor.init(this, { 
-			{0, sizeof(VertexVColor), VK_VERTEX_INPUT_RATE_VERTEX}
+		VEnv.init(this, { 
+			{0, sizeof(VertexEnv), VK_VERTEX_INPUT_RATE_VERTEX}
 			}, {
-			    {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, pos),
+			    {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, pos),
 					   sizeof(glm::vec3), POSITION},
-			    {0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, norm),
+			    {0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, norm),
 					   sizeof(glm::vec3), NORMAL},
-			    {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexVColor, color),
+			    {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, color),
 					   sizeof(glm::vec3), COLOR}
 			});
-		PVColor.init(this, &VVColor, "shaders/VColorVert.spv", "shaders/VColorFrag.spv", { &DSLGubo, &DSLVColor }); 
 		
 		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
 		
@@ -150,12 +145,9 @@ class A16 : public BaseProject {
 		
 		//environment object
 		createEnvironment(MEnv.vertices, MEnv.indices);
-		MEnv.initMesh(this, &VMesh);
-		TEnv.init(this, "textures/Textures_City.png");
-		PEnv.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", {&DSLEnv});
-		PEnv.setAdvancedFeatures(VK_COMPARE_OP_LESS, VK_POLYGON_MODE_FILL,
- 								    VK_CULL_MODE_NONE, false);
-
+		MEnv.initMesh(this, &VEnv);
+		//TEnv.init(this, "textures/Textures_City.png");
+		PEnv.init(this, &VEnv, "shaders/EnvVert.spv", "shaders/EnvFrag.spv", {&DSLGubo, &DSLEnv});
 
 		GameState = 0;
 		MoveCam = true;
@@ -164,7 +156,7 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsInit() {
 		
 		PMesh.create();
-		PVColor.create(); 
+		PEnv.create(); 
 		
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -206,21 +198,17 @@ class A16 : public BaseProject {
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
-			
-		PEnv.create();
 
 		DSEnv.init(this, &DSLEnv, {
-					{0, UNIFORM, sizeof(EnvUniformBufferObject), nullptr},
-					{1, UNIFORM, sizeof(GlobalUniformBlock), nullptr},
-					{2, TEXTURE, 0, &TEnv}
+					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}/*,
+					{1, TEXTURE, 0, &TEnv}*/
 });
 	}
 
 	
 	void pipelinesAndDescriptorSetsCleanup() {
 		
-		PMesh.cleanup();
-		PVColor.cleanup(); 
+		PMesh.cleanup(); 
 		DSCar.cleanup();
 		DSApartment.cleanup();
 		DSCrane.cleanup();
@@ -253,13 +241,11 @@ class A16 : public BaseProject {
 
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
-		DSLVColor.cleanup();
 
 		PMesh.destroy();
-		PVColor.destroy(); 
 		
 		//environment
-		TEnv.cleanup();
+		//TEnv.cleanup();
 		MEnv.cleanup();
 		DSLEnv.cleanup();
 		PEnv.destroy();	
@@ -317,6 +303,7 @@ class A16 : public BaseProject {
 			static_cast<uint32_t>(MEntertainment7.indices.size()), 1, 0, 0, 0);
 
 		//environment	
+		DSGubo.bind(commandBuffer, PEnv, 0, currentImage);
 		PEnv.bind(commandBuffer);
 		MEnv.bind(commandBuffer);
 		DSEnv.bind(commandBuffer, PEnv, 1, currentImage);		
@@ -431,7 +418,7 @@ class A16 : public BaseProject {
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
 
 		//environment
-		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)); 
+		World = glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
 		uboEnv.mvpMat = Prj * View * World; 
 		uboEnv.mMat = World;
@@ -439,9 +426,10 @@ class A16 : public BaseProject {
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
 	}
 
+	void createEnvironment(std::vector<VertexEnv> &vPos, std::vector<uint32_t> &vIdx);
 };
 
-
+#include "main_environment.hpp" //this include can't be put above because it gives errors
 
 int main() {
 	A16 app;
