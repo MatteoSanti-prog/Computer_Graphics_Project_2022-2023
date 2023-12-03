@@ -1,9 +1,5 @@
 
 #include "Starter.hpp"
-#include "Controller.hpp"
-
-//#include "environment.h"
-//#include <iostream>
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -28,15 +24,6 @@ struct VertexMesh {
 	glm::vec2 UV;
 };
 
-struct VertexEnv {
-	glm::vec3 pos; 
-	glm::vec3 norm;
-	glm::vec3 color;
-    };
-
-class A16;
-void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
-void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 
 class A16 : public BaseProject {
 	protected:
@@ -49,25 +36,15 @@ class A16 : public BaseProject {
 	
 	Pipeline PMesh;
 	
-	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7;
+	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv;
 
-	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7;
+	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv;
 
 	Texture TCity;
 
-	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7;
+	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7, uboEnv;
 
 	GlobalUniformBlock gubo;
-		
-	//environment
-	DescriptorSetLayout DSLEnv;
-	VertexDescriptor VEnv;
-	Pipeline PEnv;
-	Model<VertexEnv> MEnv;
-	MeshUniformBlock uboEnv;
-	DescriptorSet DSEnv;
-	//Texture TEnv; //al momento non ci serve
-	
 
 
 	int GameState;
@@ -82,7 +59,7 @@ class A16 : public BaseProject {
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
 		uniformBlocksInPool = 11;
-		texturesInPool = 9;
+		texturesInPool = 10;
 
 		setsInPool = 11;
 
@@ -96,10 +73,10 @@ class A16 : public BaseProject {
 	void localInit() {
 		
 		DSLMesh.init(this, {
-			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-			{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+			        {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
-
+	
 		DSLGubo.init(this, {
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
 			});
@@ -115,20 +92,7 @@ class A16 : public BaseProject {
 					   sizeof(glm::vec2), UV}
 			});
 		
-		DSLEnv.init(this, { 
-					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
-			});
-		VEnv.init(this, { 
-			{0, sizeof(VertexEnv), VK_VERTEX_INPUT_RATE_VERTEX}
-			}, {
-			    {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, pos),
-					   sizeof(glm::vec3), POSITION},
-			    {0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, norm),
-					   sizeof(glm::vec3), NORMAL},
-			    {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexEnv, color),
-					   sizeof(glm::vec3), COLOR}
-			});
-		
+
 		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
@@ -141,13 +105,10 @@ class A16 : public BaseProject {
 		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
 		MEntertainment7.init(this, &VMesh, "Models/landscape_entertainments_007.mgcg", MGCG);
 		
-		TCity.init(this, "textures/Textures_City.png");
-		
-		//environment object
 		createEnvironment(MEnv.vertices, MEnv.indices);
-		MEnv.initMesh(this, &VEnv);
-		//TEnv.init(this, "textures/Textures_City.png");
-		PEnv.init(this, &VEnv, "shaders/EnvVert.spv", "shaders/EnvFrag.spv", {&DSLGubo, &DSLEnv});
+		MEnv.initMesh(this, &VMesh);
+
+		TCity.init(this, "textures/Textures_City.png");
 
 		GameState = 0;
 		MoveCam = true;
@@ -156,7 +117,6 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsInit() {
 		
 		PMesh.create();
-		PEnv.create(); 
 		
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -195,14 +155,14 @@ class A16 : public BaseProject {
 					{1, TEXTURE, 0, &TCity}
 			});
 		
+		DSEnv.init(this, &DSLMesh, {
+					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+					{1, TEXTURE, 0, &TCity}
+			});
+
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
-
-		DSEnv.init(this, &DSLEnv, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr}/*,
-					{1, TEXTURE, 0, &TEnv}*/
-});
 	}
 
 	
@@ -218,11 +178,8 @@ class A16 : public BaseProject {
 		DSDwelling12.cleanup();
 		DSEntertainment6.cleanup();
 		DSEntertainment7.cleanup();
-		DSGubo.cleanup();
-		
-		//environment
-		PEnv.cleanup();
 		DSEnv.cleanup();
+		DSGubo.cleanup();	
 	}
 
 	void localCleanup() {
@@ -238,17 +195,12 @@ class A16 : public BaseProject {
 		MDwelling12.cleanup();
 		MEntertainment6.cleanup();
 		MEntertainment7.cleanup();
+		MEnv.cleanup();
 
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
 
-		PMesh.destroy();
-		
-		//environment
-		//TEnv.cleanup();
-		MEnv.cleanup();
-		DSLEnv.cleanup();
-		PEnv.destroy();	
+		PMesh.destroy();		
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -302,11 +254,8 @@ class A16 : public BaseProject {
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MEntertainment7.indices.size()), 1, 0, 0, 0);
 
-		//environment	
-		DSGubo.bind(commandBuffer, PEnv, 0, currentImage);
-		PEnv.bind(commandBuffer);
 		MEnv.bind(commandBuffer);
-		DSEnv.bind(commandBuffer, PEnv, 1, currentImage);		
+		DSEnv.bind(commandBuffer, PMesh, 1, currentImage);		
 		vkCmdDrawIndexed(commandBuffer,
 				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
 	}
@@ -341,9 +290,9 @@ class A16 : public BaseProject {
 		}
 
 		if (MoveCam)		
-			FreeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+			freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 		else
-			GameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+			gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 
 		Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
 		Prj[1][1] *= -1;
@@ -417,8 +366,7 @@ class A16 : public BaseProject {
 		uboEntertainment7.nMat = glm::inverse(glm::transpose(World));
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
 
-		//environment
-		World = glm::mat4(1.0f); //glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(4.0f));
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
 		uboEnv.mvpMat = Prj * View * World; 
 		uboEnv.mMat = World;
@@ -426,10 +374,13 @@ class A16 : public BaseProject {
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
 	}
 
-	void createEnvironment(std::vector<VertexEnv> &vPos, std::vector<uint32_t> &vIdx);
+	void createEnvironment(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
+	void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+	void gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 };
 
-#include "main_environment.hpp" //this include can't be put above because it gives errors
+#include "Environment.hpp"
+#include "Controller.hpp"
 
 int main() {
 	A16 app;

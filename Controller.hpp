@@ -11,7 +11,7 @@ Its parameters are:
 -) float& CarYaw = reference to a floating point number containing the direction of the car and which will be one of the outputs of the function
 -) glm::vec3& CamPos = reference to a 3D vector containing the position of the camera and which will be one of the outputs of the function
 */
-void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
+void A16::freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
 	/*Constant used for dumping*/
 	const float lambda = 10.0f;
 
@@ -22,7 +22,7 @@ void FreeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
 	const float MinPitch = glm::radians(-90.0f);
 	const float MaxPitch = glm::radians(90.0f);
 	const float RotSpeed = glm::radians(90.0f);
-	const float MovSpeed = 1.0f;
+	const float MovSpeed = 10.0f;
 
 	/*Static variable used to store the current position of the camera*/
 	static glm::vec3 LocalCamPos = StartingPosition;
@@ -88,7 +88,7 @@ Its parameters are:
 -) float& CarYaw = reference to a floating point number containing the direction of the car and which will be one of the outputs of the function
 -) glm::vec3& CamPos = reference to a 3D vector containing the position of the camera and which will be one of the outputs of the function
 */
-void GameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
+void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
 	
 	/*Constant used for dumping*/
 	const float lambda = 10.0f;
