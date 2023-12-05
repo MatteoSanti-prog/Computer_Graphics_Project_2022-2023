@@ -15,6 +15,8 @@ void A16::freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix,
 	/*Constant used for dumping*/
 	const float lambda = 10.0f;
 
+	const float ScalingFactor = 0.25f;
+
 	/*Constant used for setting the initial position of the camera*/
 	const glm::vec3 StartingPosition = glm::vec3(0.0f, 2.0f, 7.0f);
 
@@ -73,7 +75,7 @@ void A16::freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix,
 	CarYaw = glm::radians(180.0f);
 
 	/*Create a World Matrix for the car*/
-	WorldMatrix = glm::translate(glm::mat4(1.0), CarPos) * glm::rotate(glm::mat4(1.0), CarYaw, glm::vec3(0, 1, 0));
+	WorldMatrix = glm::translate(glm::mat4(1.0), CarPos) * glm::rotate(glm::mat4(1.0), CarYaw, glm::vec3(0, 1, 0)) * glm::scale(glm::mat4(1.0), glm::vec3(ScalingFactor));
 }
 
 /*
@@ -92,14 +94,16 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 	
 	/*Constant used for dumping*/
 	const float lambda = 10.0f;
+
+	const float ScalingFactor = 0.5f;
 	
 	/*Constants used for setting the initial position and the initial direction of the car*/
 	const glm::vec3 StartingPosition = glm::vec3(0.0f);
 	const float StartingDirection = glm::radians(0.0f);
 	
 	/*Constants representing the height and the distance of the camera from the car*/
-	const float CamHeight = 1.0f;
-	const float CamDist = 5.0f;
+	float CamHeight = 1.0f;
+	float CamDist = 5.0f;
 	
 	/*Constants used to bind pitch of the camera*/
 	const float MinPitch = glm::radians(10.0f);
@@ -201,7 +205,10 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 	LocalCarPos += uz * MovSpeed * deltaT;
 
 	/*Create a World Matrix for the car*/
-	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), LocalCarYaw, glm::vec3(0, 1, 0));
+	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), LocalCarYaw, glm::vec3(0, 1, 0)) * glm::scale(glm::mat4(1.0), glm::vec3(ScalingFactor));
+
+	CamHeight = ScalingFactor * CamHeight;
+	CamDist = ScalingFactor * CamDist;
 
 	/*Update the position of the camera using dumping*/
 	CamPosNew = WorldMatrix * glm::vec4(0.0f, CamHeight + CamDist * sin(CamPitch), CamDist * cos(CamPitch), 1.0f);
@@ -220,5 +227,5 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 	CarYaw = LocalCarYaw;
 
 	/*Create again a World Matrix for the car where the model is rotated consistently with respect to the view*/
-	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + LocalCarYaw, glm::vec3(0, 1, 0));
+	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + LocalCarYaw, glm::vec3(0, 1, 0)) * glm::scale(glm::mat4(1.0), glm::vec3(ScalingFactor));
 }
