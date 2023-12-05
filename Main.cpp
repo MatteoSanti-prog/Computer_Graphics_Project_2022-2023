@@ -37,13 +37,13 @@ class A16 : public BaseProject {
 	
 	Pipeline PMesh;
 	
-	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv;
+	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv, MRoad;
 
-	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv;
+	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv, DSRoad;
 
 	Texture TCity;
 
-	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7, uboEnv;
+	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7, uboEnv, uboRoad;
 
 	GlobalUniformBlock gubo;
 
@@ -59,10 +59,10 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 11;
-		texturesInPool = 10;
+		uniformBlocksInPool = 12;
+		texturesInPool = 11;
 
-		setsInPool = 11;
+		setsInPool = 12;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -105,6 +105,7 @@ class A16 : public BaseProject {
 		MDwelling12.init(this, &VMesh, "Models/dwelling_012.mgcg", MGCG);
 		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
 		MEntertainment7.init(this, &VMesh, "Models/landscape_entertainments_007.mgcg", MGCG);
+		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
 		
 		createEnvironment(MEnv.vertices, MEnv.indices);
 		MEnv.initMesh(this, &VMesh);
@@ -161,6 +162,11 @@ class A16 : public BaseProject {
 					{1, TEXTURE, 0, &TCity}
 			});
 
+		DSRoad.init(this, &DSLMesh, {
+					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+					{1, TEXTURE, 0, &TCity}
+			});
+
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
@@ -179,6 +185,7 @@ class A16 : public BaseProject {
 		DSDwelling12.cleanup();
 		DSEntertainment6.cleanup();
 		DSEntertainment7.cleanup();
+		DSRoad.cleanup();
 		DSEnv.cleanup();
 		DSGubo.cleanup();	
 	}
@@ -196,6 +203,7 @@ class A16 : public BaseProject {
 		MDwelling12.cleanup();
 		MEntertainment6.cleanup();
 		MEntertainment7.cleanup();
+		MRoad.cleanup();
 		MEnv.cleanup();
 
 		DSLMesh.cleanup();
@@ -254,6 +262,11 @@ class A16 : public BaseProject {
 		DSEntertainment7.bind(commandBuffer, PMesh, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MEntertainment7.indices.size()), 1, 0, 0, 0);
+
+		MRoad.bind(commandBuffer);
+		DSRoad.bind(commandBuffer, PMesh, 1, currentImage);
+		vkCmdDrawIndexed(commandBuffer,
+			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0);
 
 		MEnv.bind(commandBuffer);
 		DSEnv.bind(commandBuffer, PMesh, 1, currentImage);		
@@ -368,6 +381,13 @@ class A16 : public BaseProject {
 		uboEntertainment7.nMat = glm::inverse(glm::transpose(World));
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
 		*/
+
+		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -2.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+		uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
+		uboRoad.mvpMat = Prj * View * World;
+		uboRoad.mMat = World;
+		uboRoad.nMat = glm::inverse(glm::transpose(World));
+		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 
 		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
