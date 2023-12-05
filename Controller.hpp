@@ -1,4 +1,5 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include "Borders.hpp"
 /*
 FreeCam contains the logic to manage the movement and rotation of the camera in the initial part of the application.
 Its parameters are:
@@ -139,7 +140,7 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 
 	/*Static variables used to store current positon and direction both for the car and for the camera*/
 	static float LocalCarYaw = StartingDirection;
-	static glm::vec3 LocalCamPos, LocalCarPos = glm::vec3(0.0f, 0.0, 50.0f);
+	static glm::vec3 LocalCamPos, LocalCarPos = glm::vec3(0.0f, 0.0, 50.0f), OldCarPos = glm::vec3(0.0f, 0.0, 50.0f);
 	static float CamPitch = glm::radians(10.0f);
 
 	/*Static variables used to perform dumping*/
@@ -199,6 +200,8 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 
 	/*Update the position of the car*/
 	LocalCarPos += uz * MovSpeed * deltaT;
+	if (!validPosition(LocalCarPos, scalingFactor))
+		LocalCarPos = OldCarPos;
 
 	/*Create a World Matrix for the car*/
 	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), LocalCarYaw, glm::vec3(0, 1, 0));
@@ -221,4 +224,6 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 
 	/*Create again a World Matrix for the car where the model is rotated consistently with respect to the view*/
 	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + LocalCarYaw, glm::vec3(0, 1, 0));
+
+	OldCarPos = LocalCarPos;
 }
