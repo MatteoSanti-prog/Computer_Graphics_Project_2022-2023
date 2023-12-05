@@ -309,7 +309,7 @@ class A16 : public BaseProject {
 		uboCar.mMat = World;
 		uboCar.nMat = glm::inverse(glm::transpose(World));
 		DSCar.map(currentImage, &uboCar, sizeof(uboCar), 0);
-		/*
+
 		World = glm::translate(glm::mat4(1.0), glm::vec3(-25.0f, 0.0f, -10.0f));
 		uboApartment.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
 		uboApartment.mvpMat = Prj * View * World;
@@ -365,9 +365,8 @@ class A16 : public BaseProject {
 		uboEntertainment7.mMat = World;
 		uboEntertainment7.nMat = glm::inverse(glm::transpose(World));
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
-		*/
 
-		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) /** glm::scale(glm::mat4(1.0), glm::vec3(4.0f))*/;
+		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(4.0f));
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
 		uboEnv.mvpMat = Prj * View * World; 
 		uboEnv.mMat = World;
