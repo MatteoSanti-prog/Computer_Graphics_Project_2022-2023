@@ -210,6 +210,8 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 	CamPosNew = WorldMatrix * glm::vec4(0.0f, CamHeight + CamDist * sin(CamPitch), CamDist * cos(CamPitch), 1.0f);
 	Target = WorldMatrix * glm::vec4(0, 0, 0, 1.0f) + glm::vec4(0, CamHeight, 0, 0);
 	LocalCamPos = CamPosOld * exp(-lambda * deltaT) + CamPosNew * (1 - exp(-lambda * deltaT));
+	if (!validPosition(LocalCamPos, scalingFactor))
+		LocalCamPos = CamPosOld;
 
 	/*Create a View Matrix using a look at model*/
 	ViewMatrix = glm::lookAt(LocalCamPos, Target, glm::vec3(0.0f, 1.0f, 0.0f));

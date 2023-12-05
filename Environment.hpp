@@ -9,7 +9,7 @@ void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t>
 
 	// Upper part
 	vPos.push_back({ {5,1,h}, {0,0,1}, {0.40f,0.24f} }); //G 
-	vPos.push_back({ {8,1,h}, {0,0,1}, {0.42f,0.24f} }); //F
+	vPos.push_back({ {7,1,h}, {0,0,1}, {0.42f,0.24f} }); //F
 	vPos.push_back({ {5,-7,h}, {0,0,1}, {0.40f,0.26f} }); //H
 	vPos.push_back({ {7,-7,h}, {0,0,1}, {0.42f,0.26f}}); //E 
 	
@@ -25,15 +25,15 @@ void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t>
 
 
 	//Side part (facing y-axis)
-	vPos.push_back({ {8,1,h}, {0,1,0}, {0.40f,0.24f} }); //F
+	vPos.push_back({ {7,1,h}, {0,1,0}, {0.40f,0.24f} }); //F
 	vPos.push_back({ {5,1,h}, {0,1,0}, {0.42f,0.24f} }); //G  
-	vPos.push_back({ {8,1,0}, {0,1,0}, {0.40f,0.26f} });  //F'
+	vPos.push_back({ {7,1,0}, {0,1,0}, {0.40f,0.26f} });  //F'
 	vPos.push_back({{5,1,0}, {0,1,0}, {0.42f,0.26f} });  //G'
 	
 	vPos.push_back({ {5,-7,h}, {0,-1,0}, {0.40f,0.24f} }); //H  
 	vPos.push_back({ {7,-7,h}, {0,-1,0}, {0.42f,0.24f} }); //E
 	vPos.push_back({ {5,-7,0}, {0,-1,0}, {0.40f,0.26f} }); //H'
-	vPos.push_back({ {87,-7,0}, {0,-1,0}, {0.42f,0.26f} }); //E' 
+	vPos.push_back({ {7,-7,0}, {0,-1,0}, {0.42f,0.26f} }); //E' 
 
 	vPos.push_back({ {4,2,h}, {0,1,0},  {0.40f,0.24f} }); //J
 	vPos.push_back({ {-5,2,h}, {0,1,0}, {0.42f,0.24f} }); //R 
@@ -58,9 +58,9 @@ void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t>
 
 	//Side part (facing x-axis)
 	vPos.push_back({ {7,-7,h}, {1,0,0}, {0.40f,0.24f} }); //E 
-	vPos.push_back({ {8,1,h}, {1,0,0}, {0.42f,0.24f} }); //F
+	vPos.push_back({ {7,1,h}, {1,0,0}, {0.42f,0.24f} }); //F
 	vPos.push_back({ {7,-7,0}, {1,0,0}, {0.40f,0.26f} }); //E'
-	vPos.push_back({ {8,1,0}, {1,0,0}, {0.42f,0.26f} }); //F'
+	vPos.push_back({ {7,1,0}, {1,0,0}, {0.42f,0.26f} }); //F'
 
 	vPos.push_back({ {5,1,h}, {-1,0,0}, {0.40f,0.24f} }); //G 
 	vPos.push_back({ {5,-7,h}, {-1,0,0}, {0.42f,0.24f} }); //H

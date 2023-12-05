@@ -24,20 +24,20 @@ public:
 	}
 };
 
-bool validPosition(glm::vec3 carPos, float scalingFactor) {
+bool validPosition(glm::vec3 pos, float scalingFactor) {
 	float border = 15.0f;
 
 	Collider mapLimits { border, -border, border, -border, 10.0f, scalingFactor };
 	Collider sectionGFHE { 7.0f, 5.0f, 7.0f, -1.0f, 1.5f, scalingFactor };
 	Collider sectionRJQG { 4.0f, -5.0f, 0, -2.0f, 1.5f, scalingFactor };
 	Collider sectionOPKN { -5.0f, -8.0f, 3.0f, -7.0f, 1.5f, scalingFactor };
-	if (sectionGFHE.isInside(carPos))
+	if (sectionGFHE.isInside(pos))
 		return false;
-	if (sectionRJQG.isInside(carPos))
+	if (sectionRJQG.isInside(pos))
 		return false;
-	if (sectionOPKN.isInside(carPos))
+	if (sectionOPKN.isInside(pos))
 		return false;
-	if (mapLimits.isInside(carPos))
+	if (mapLimits.isInside(pos))
 		return true;
 	return false;
 }
