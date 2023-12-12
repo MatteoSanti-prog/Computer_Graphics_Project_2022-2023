@@ -17,10 +17,18 @@ struct GlobalUniformBlock {
 	alignas(16) glm::vec3 eyePos;
 };
 
+struct OverlayUniformBlock {
+	alignas(4) float visible;
+};
 
 struct VertexMesh {
 	glm::vec3 pos;
 	glm::vec3 norm;
+	glm::vec2 UV;
+};
+
+struct VertexOverlay {
+	glm::vec2 pos;
 	glm::vec2 UV;
 };
 
@@ -31,19 +39,21 @@ class A16 : public BaseProject {
 
 	float Ar;
 
-	DescriptorSetLayout DSLGubo, DSLMesh;
+	DescriptorSetLayout DSLGubo, DSLMesh, DSLOverlay;
 	
-	VertexDescriptor VMesh;
+	VertexDescriptor VMesh, VOverlay;
 	
-	Pipeline PMesh;
+	Pipeline PMesh, POverlay;
 	
 	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv, MRoad;
+	Model<VertexOverlay> MSplash;
 
-	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv, DSRoad;
+	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv, DSRoad, DSSplash;
 
-	Texture TCity;
+	Texture TCity, TSplash;
 
 	MeshUniformBlock uboCar, uboApartment, uboCrane, uboDwellingStore1, uboDwellingStore8, uboDwelling1, uboDwelling12, uboEntertainment6, uboEntertainment7, uboEnv, uboRoad;
+	OverlayUniformBlock uboSplash;
 
 	GlobalUniformBlock gubo;
 
@@ -59,10 +69,10 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 12;
-		texturesInPool = 11;
+		uniformBlocksInPool = 13;
+		texturesInPool = 12;
 
-		setsInPool = 12;
+		setsInPool = 13;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -77,10 +87,16 @@ class A16 : public BaseProject {
 			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
 			        {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
+
+		DSLOverlay.init(this, {
+			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+					{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+			});
 	
 		DSLGubo.init(this, {
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
 			});
+
 
 		VMesh.init(this, {
 			{0, sizeof(VertexMesh), VK_VERTEX_INPUT_RATE_VERTEX}
@@ -92,9 +108,21 @@ class A16 : public BaseProject {
 				{0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
 					   sizeof(glm::vec2), UV}
 			});
+
+		VOverlay.init(this, {
+	        {0, sizeof(VertexOverlay), VK_VERTEX_INPUT_RATE_VERTEX}
+			}, {
+				{0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, pos),
+					   sizeof(glm::vec2), OTHER},
+				{0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, UV),
+					   sizeof(glm::vec2), UV}
+			});
 		
 
 		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
+		POverlay.init(this, &VOverlay, "shaders/OverlayVert.spv", "shaders/OverlayFrag.spv", { &DSLOverlay });
+		POverlay.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
+			VK_CULL_MODE_NONE, false);
 		
 		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
 		MApartment.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
@@ -106,11 +134,17 @@ class A16 : public BaseProject {
 		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
 		MEntertainment7.init(this, &VMesh, "Models/landscape_entertainments_007.mgcg", MGCG);
 		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
+
+		MSplash.vertices = { {{-1.0f, -0.58559f}, {0.0102f, 0.0f}}, {{-1.0f, 0.58559f}, {0.0102f,0.85512f}},
+						 {{ 1.0f,-0.58559f}, {1.0f,0.0f}}, {{ 1.0f, 0.58559f}, {1.0f,0.85512f}} };
+		MSplash.indices = { 0, 1, 2,    1, 2, 3 };
+		MSplash.initMesh(this, &VOverlay);
 		
 		createEnvironment(MEnv.vertices, MEnv.indices);
 		MEnv.initMesh(this, &VMesh);
 
 		TCity.init(this, "textures/Textures_City.png");
+		TSplash.init(this, "textures/initialscreen.png");
 
 		GameState = 0;
 		MoveCam = true;
@@ -119,6 +153,7 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsInit() {
 		
 		PMesh.create();
+		POverlay.create();
 		
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -167,6 +202,11 @@ class A16 : public BaseProject {
 					{1, TEXTURE, 0, &TCity}
 			});
 
+		DSSplash.init(this, &DSLOverlay, {
+					{0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
+					{1, TEXTURE, 0, &TSplash}
+		    });
+
 		DSGubo.init(this, &DSLGubo, {
 					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
 			});
@@ -176,6 +216,7 @@ class A16 : public BaseProject {
 	void pipelinesAndDescriptorSetsCleanup() {
 		
 		PMesh.cleanup(); 
+		POverlay.cleanup();
 		DSCar.cleanup();
 		DSApartment.cleanup();
 		DSCrane.cleanup();
@@ -187,12 +228,14 @@ class A16 : public BaseProject {
 		DSEntertainment7.cleanup();
 		DSRoad.cleanup();
 		DSEnv.cleanup();
+		DSSplash.cleanup();
 		DSGubo.cleanup();	
 	}
 
 	void localCleanup() {
 		
 		TCity.cleanup();
+		TSplash.cleanup();
 
 		MCar.cleanup();
 		MApartment.cleanup();
@@ -205,11 +248,14 @@ class A16 : public BaseProject {
 		MEntertainment7.cleanup();
 		MRoad.cleanup();
 		MEnv.cleanup();
+		MSplash.cleanup();
 
 		DSLMesh.cleanup();
+		DSLSplash.cleanup();
 		DSLGubo.cleanup();
 
-		PMesh.destroy();		
+		PMesh.destroy();
+		POverlay.cleanup();
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -272,6 +318,12 @@ class A16 : public BaseProject {
 		DSEnv.bind(commandBuffer, PMesh, 1, currentImage);		
 		vkCmdDrawIndexed(commandBuffer,
 				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+
+		POverlay.bind(commandBuffer);
+		MSplash.bind(commandBuffer);
+		DSSplash.bind(commandBuffer, POverlay, 0, currentImage);
+		vkCmdDrawIndexed(commandBuffer,
+			static_cast<uint32_t>(MSplash.indices.size()), 1, 0, 0, 0);
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -395,6 +447,9 @@ class A16 : public BaseProject {
 		uboEnv.mMat = World;
 		uboEnv.nMat = glm::inverse(glm::transpose(World));
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+
+		uboSplash.visible = (gameState == 0) ? 1.0f : 0.0f;
+		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
 	}
 
 	void createEnvironment(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
