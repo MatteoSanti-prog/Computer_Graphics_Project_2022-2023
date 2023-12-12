@@ -382,7 +382,7 @@ class A16 : public BaseProject {
 		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
 		*/
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -2.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.3f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
 		uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
 		uboRoad.mvpMat = Prj * View * World;
 		uboRoad.mMat = World;
