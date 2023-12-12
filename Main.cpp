@@ -135,8 +135,8 @@ class A16 : public BaseProject {
 		MEntertainment7.init(this, &VMesh, "Models/landscape_entertainments_007.mgcg", MGCG);
 		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
 
-		MSplash.vertices = { {{-1.0f, -0.58559f}, {0.0102f, 0.0f}}, {{-1.0f, 0.58559f}, {0.0102f,0.85512f}},
-						 {{ 1.0f,-0.58559f}, {1.0f,0.0f}}, {{ 1.0f, 0.58559f}, {1.0f,0.85512f}} };
+		MSplash.vertices = { {{-1.0f, -1.0f}, {0.001f, 0.001f}}, {{-1.0f, 1.0f}, {0.001f,0.999f}},
+						 {{ 1.0f,-1.0f}, {0.999f,0.001f}}, {{ 1.0f, 1.0f}, {0.999f,0.999f}} };
 		MSplash.indices = { 0, 1, 2,    1, 2, 3 };
 		MSplash.initMesh(this, &VOverlay);
 		
@@ -144,7 +144,7 @@ class A16 : public BaseProject {
 		MEnv.initMesh(this, &VMesh);
 
 		TCity.init(this, "textures/Textures_City.png");
-		TSplash.init(this, "textures/initialscreen.png");
+		TSplash.init(this, "textures/initial_screen.png");
 
 		GameState = 0;
 		MoveCam = true;
@@ -217,6 +217,7 @@ class A16 : public BaseProject {
 		
 		PMesh.cleanup(); 
 		POverlay.cleanup();
+
 		DSCar.cleanup();
 		DSApartment.cleanup();
 		DSCrane.cleanup();
@@ -251,11 +252,11 @@ class A16 : public BaseProject {
 		MSplash.cleanup();
 
 		DSLMesh.cleanup();
-		DSLSplash.cleanup();
+		DSLOverlay.cleanup();
 		DSLGubo.cleanup();
 
 		PMesh.destroy();
-		POverlay.cleanup();
+		POverlay.destroy();
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -344,111 +345,123 @@ class A16 : public BaseProject {
 
 		getSixAxis(deltaT, m, r, fire);
 
+		static bool wasFire = false;
+		bool handleFire = (wasFire && (!fire));
+		wasFire = fire;
+
 		switch (GameState) {
 		case 0:
-		    if (glfwGetKey(window, GLFW_KEY_P)) {
-			    MoveCam = false;
-			    GameState = 1;
-		    }
+			if (handleFire) {
+				GameState = 1;	
+			}
 			break;
 		case 1:
+			if (handleFire) {
+				MoveCam = false;
+				GameState = 2;
+			}
+			break;
+		case 2:
 			break;
 		}
 
-		if (MoveCam)		
-			freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-		else
-			gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+		if (GameState != 0) {
 
-		Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
-		Prj[1][1] *= -1;
+			if (MoveCam)		
+				freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+			else
+				gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 
-		gubo.DlightDir = glm::normalize(glm::vec3(1, 2, 3));
-		gubo.DlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		gubo.AmbLightColor = glm::vec3(0.1f);
-		gubo.eyePos = CamPos;
+			Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
+			Prj[1][1] *= -1;
 
-		DSGubo.map(currentImage, &gubo, sizeof(gubo), 0);
+			gubo.DlightDir = glm::normalize(glm::vec3(1, 2, 3));
+			gubo.DlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			gubo.AmbLightColor = glm::vec3(0.1f);
+			gubo.eyePos = CamPos;
 
-		uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
-		uboCar.mvpMat = Prj * View * World;
-		uboCar.mMat = World;
-		uboCar.nMat = glm::inverse(glm::transpose(World));
-		DSCar.map(currentImage, &uboCar, sizeof(uboCar), 0);
+			DSGubo.map(currentImage, &gubo, sizeof(gubo), 0);
 
-		/*
-		World = glm::translate(glm::mat4(1.0), glm::vec3(-25.0f, 0.0f, -10.0f));
-		uboApartment.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
-		uboApartment.mvpMat = Prj * View * World;
-		uboApartment.mMat = World;
-		uboApartment.nMat = glm::inverse(glm::transpose(World));
-		DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
+			uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
+			uboCar.mvpMat = Prj * View * World;
+			uboCar.mMat = World;
+			uboCar.nMat = glm::inverse(glm::transpose(World));
+			DSCar.map(currentImage, &uboCar, sizeof(uboCar), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 20.0f));
-		uboCrane.amb = 1.0f; uboCrane.gamma = 180.0f; uboCrane.sColor = glm::vec3(1.0f);
-		uboCrane.mvpMat = Prj * View * World;
-		uboCrane.mMat = World;
-		uboCrane.nMat = glm::inverse(glm::transpose(World));
-		DSCrane.map(currentImage, &uboCrane, sizeof(uboCrane), 0);
+			/*
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-25.0f, 0.0f, -10.0f));
+			uboApartment.amb = 1.0f; uboApartment.gamma = 180.0f; uboApartment.sColor = glm::vec3(1.0f);
+			uboApartment.mvpMat = Prj * View * World;
+			uboApartment.mMat = World;
+			uboApartment.nMat = glm::inverse(glm::transpose(World));
+			DSApartment.map(currentImage, &uboApartment, sizeof(uboApartment), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(-13.5f, 0.0f, -10.0f));
-		uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.sColor = glm::vec3(1.0f);
-		uboDwellingStore1.mvpMat = Prj * View * World;
-		uboDwellingStore1.mMat = World;
-		uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
-		DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 20.0f));
+			uboCrane.amb = 1.0f; uboCrane.gamma = 180.0f; uboCrane.sColor = glm::vec3(1.0f);
+			uboCrane.mvpMat = Prj * View * World;
+			uboCrane.mMat = World;
+			uboCrane.nMat = glm::inverse(glm::transpose(World));
+			DSCrane.map(currentImage, &uboCrane, sizeof(uboCrane), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(13.5f, 0.0f, -10.0f));
-		uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.sColor = glm::vec3(1.0f);
-		uboDwellingStore8.mvpMat = Prj * View * World;
-		uboDwellingStore8.mMat = World;
-		uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
-		DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-13.5f, 0.0f, -10.0f));
+			uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.sColor = glm::vec3(1.0f);
+			uboDwellingStore1.mvpMat = Prj * View * World;
+			uboDwellingStore1.mMat = World;
+			uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
+			DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, -12.5f));
-		uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
-		uboDwelling1.mvpMat = Prj * View * World;
-		uboDwelling1.mMat = World;
-		uboDwelling1.nMat = glm::inverse(glm::transpose(World));
-		DSDwelling1.map(currentImage, &uboDwelling1, sizeof(uboDwelling1), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(13.5f, 0.0f, -10.0f));
+			uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.sColor = glm::vec3(1.0f);
+			uboDwellingStore8.mvpMat = Prj * View * World;
+			uboDwellingStore8.mMat = World;
+			uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
+			DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(25.0f, 0.0f, -10.0f));
-		uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f; uboDwelling12.sColor = glm::vec3(1.0f);
-		uboDwelling12.mvpMat = Prj * View * World;
-		uboDwelling12.mMat = World;
-		uboDwelling12.nMat = glm::inverse(glm::transpose(World));
-		DSDwelling12.map(currentImage, &uboDwelling12, sizeof(uboDwelling12), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, -12.5f));
+			uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
+			uboDwelling1.mvpMat = Prj * View * World;
+			uboDwelling1.mMat = World;
+			uboDwelling1.nMat = glm::inverse(glm::transpose(World));
+			DSDwelling1.map(currentImage, &uboDwelling1, sizeof(uboDwelling1), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(-20.0f, 0.0f, 10.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
-		uboEntertainment6.mvpMat = Prj * View * World;
-		uboEntertainment6.mMat = World;
-		uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
-		DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(25.0f, 0.0f, -10.0f));
+			uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f; uboDwelling12.sColor = glm::vec3(1.0f);
+			uboDwelling12.mvpMat = Prj * View * World;
+			uboDwelling12.mMat = World;
+			uboDwelling12.nMat = glm::inverse(glm::transpose(World));
+			DSDwelling12.map(currentImage, &uboDwelling12, sizeof(uboDwelling12), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0.0f, 10.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		uboEntertainment7.amb = 1.0f; uboEntertainment7.gamma = 180.0f; uboEntertainment7.sColor = glm::vec3(1.0f);
-		uboEntertainment7.mvpMat = Prj * View * World;
-		uboEntertainment7.mMat = World;
-		uboEntertainment7.nMat = glm::inverse(glm::transpose(World));
-		DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
-		*/
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-20.0f, 0.0f, 10.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
+			uboEntertainment6.mvpMat = Prj * View * World;
+			uboEntertainment6.mMat = World;
+			uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
+			DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
 
-		World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.3f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-		uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
-		uboRoad.mvpMat = Prj * View * World;
-		uboRoad.mMat = World;
-		uboRoad.nMat = glm::inverse(glm::transpose(World));
-		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0.0f, 10.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			uboEntertainment7.amb = 1.0f; uboEntertainment7.gamma = 180.0f; uboEntertainment7.sColor = glm::vec3(1.0f);
+			uboEntertainment7.mvpMat = Prj * View * World;
+			uboEntertainment7.mMat = World;
+			uboEntertainment7.nMat = glm::inverse(glm::transpose(World));
+			DSEntertainment7.map(currentImage, &uboEntertainment7, sizeof(uboEntertainment7), 0);
+			*/
 
-		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
-		uboEnv.mvpMat = Prj * View * World; 
-		uboEnv.mMat = World;
-		uboEnv.nMat = glm::inverse(glm::transpose(World));
-		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+			World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.3f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+			uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
+			uboRoad.mvpMat = Prj * View * World;
+			uboRoad.mMat = World;
+			uboRoad.nMat = glm::inverse(glm::transpose(World));
+			DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 
-		uboSplash.visible = (gameState == 0) ? 1.0f : 0.0f;
+			World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+			uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
+			uboEnv.mvpMat = Prj * View * World;
+			uboEnv.mMat = World;
+			uboEnv.nMat = glm::inverse(glm::transpose(World));
+			DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+		}
+
+		uboSplash.visible = (GameState == 0) ? 1.0f : 0.0f;
 		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
 	}
 
