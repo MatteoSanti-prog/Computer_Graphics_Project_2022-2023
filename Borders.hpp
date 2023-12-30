@@ -31,6 +31,7 @@ bool validPosition(glm::vec3 pos, float scalingFactor) {
 	Collider sectionGFHE { 7.0f, 5.0f, 7.0f, -1.0f, 1.5f, scalingFactor };
 	Collider sectionRJQG { 4.0f, -5.0f, 0, -2.0f, 1.5f, scalingFactor };
 	Collider sectionOPKN { -5.0f, -8.0f, 3.0f, -7.0f, 1.5f, scalingFactor };
+    //Collider Test {0.5f, -0.5f, 3.0f, 2.0f, 1.0f, 3.0f};
 	if (sectionGFHE.isInside(pos))
 		return false;
 	if (sectionRJQG.isInside(pos))

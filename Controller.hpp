@@ -1,5 +1,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "Borders.hpp"
+#include "Checkpoint.hpp"
+
 /*
 FreeCam contains the logic to manage the movement and rotation of the camera in the initial part of the application.
 Its parameters are:
@@ -202,6 +204,9 @@ void A16::gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatri
 	LocalCarPos += uz * MovSpeed * deltaT;
 	if (!validPosition(LocalCarPos, scalingFactor))
 		LocalCarPos = OldCarPos;
+    
+    /*Check the checkpoints*/
+    trackCheckpoints(LocalCarPos);
 
 	/*Create a World Matrix for the car*/
 	WorldMatrix = glm::translate(glm::mat4(1.0), LocalCarPos) * glm::rotate(glm::mat4(1.0), LocalCarYaw, glm::vec3(0, 1, 0));

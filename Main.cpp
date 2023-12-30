@@ -1,5 +1,6 @@
 
 #include "Starter.hpp"
+#include "Checkpoint.hpp"
 
 struct MeshUniformBlock {
 	alignas(4) float amb;
@@ -37,9 +38,9 @@ class A16 : public BaseProject {
 	
 	Pipeline PMesh;
 	
-	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv, MRoad;
+	Model<VertexMesh> MCar, MApartment, MCrane, MDwellingStore1, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEntertainment7, MEnv, MRoad, MCylinder;
 
-	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv, DSRoad;
+	DescriptorSet DSGubo, DSCar, DSApartment, DSCrane, DSDwellingStore1, DSDwellingStore8, DSDwelling1, DSDwelling12, DSEntertainment6, DSEntertainment7, DSEnv, DSRoad, DSCylinder;
 
 	Texture TCity;
 
@@ -59,10 +60,10 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 12;
-		texturesInPool = 11;
+		uniformBlocksInPool = 13;
+		texturesInPool = 12;
 
-		setsInPool = 12;
+		setsInPool = 13;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -109,11 +110,17 @@ class A16 : public BaseProject {
 		
 		createEnvironment(MEnv.vertices, MEnv.indices);
 		MEnv.initMesh(this, &VMesh);
+        
+        createCircleMesh(MCylinder.vertices, MCylinder.indices);
+        MCylinder.initMesh(this, &VMesh);
 
 		TCity.init(this, "textures/Textures_City.png");
 
 		GameState = 0;
 		MoveCam = true;
+        
+        //Initialize Checkpoints
+        initializeCheckpoints();
 	}
 
 	void pipelinesAndDescriptorSetsInit() {
@@ -161,6 +168,11 @@ class A16 : public BaseProject {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
 					{1, TEXTURE, 0, &TCity}
 			});
+        
+        DSCylinder.init(this, &DSLMesh, {
+            {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+            {1, TEXTURE, 0, &TCity}
+    });
 
 		DSRoad.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -187,7 +199,8 @@ class A16 : public BaseProject {
 		DSEntertainment7.cleanup();
 		DSRoad.cleanup();
 		DSEnv.cleanup();
-		DSGubo.cleanup();	
+		DSGubo.cleanup();
+        DSCylinder.cleanup();
 	}
 
 	void localCleanup() {
@@ -205,6 +218,7 @@ class A16 : public BaseProject {
 		MEntertainment7.cleanup();
 		MRoad.cleanup();
 		MEnv.cleanup();
+        MCylinder.cleanup();
 
 		DSLMesh.cleanup();
 		DSLGubo.cleanup();
@@ -272,6 +286,11 @@ class A16 : public BaseProject {
 		DSEnv.bind(commandBuffer, PMesh, 1, currentImage);		
 		vkCmdDrawIndexed(commandBuffer,
 				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+        
+        MCylinder.bind(commandBuffer);
+        DSCylinder.bind(commandBuffer, PMesh, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                static_cast<uint32_t>(MCylinder.indices.size()), 1, 0, 0, 0);
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -395,11 +414,14 @@ class A16 : public BaseProject {
 		uboEnv.mMat = World;
 		uboEnv.nMat = glm::inverse(glm::transpose(World));
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+        DSCylinder.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
 	}
 
 	void createEnvironment(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
 	void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
 	void gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+    void createCircleMesh(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
+    
 };
 
 #include "Environment.hpp"
