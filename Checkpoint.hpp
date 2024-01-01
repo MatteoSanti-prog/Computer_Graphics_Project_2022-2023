@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stack>
+
 #include <glm/glm.hpp>
 #include <iostream>
 
@@ -27,4 +27,5 @@ class Checkpoint {
 
 // Function declarations
 void initializeCheckpoints();
-void trackCheckpoints(glm::vec3 CarPos);
+bool trackCheckpoints(glm::vec3 CarPos);
+glm::vec3 getcurrentCheckpointPos();

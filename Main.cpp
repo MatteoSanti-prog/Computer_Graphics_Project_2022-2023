@@ -1,5 +1,5 @@
-
 #include "Starter.hpp"
+<<<<<<< Updated upstream
 #include "Checkpoint.hpp"
 
 struct MeshUniformBlock {
@@ -26,6 +26,13 @@ struct VertexMesh {
 };
 
 const float scalingFactor = 4.0f;
+=======
+#include "Constants.hpp"
+#include "Controller.hpp"
+#include "Environment.hpp"
+#include "Structs.hpp"
+#include "Checkpoint.hpp"
+>>>>>>> Stashed changes
 
 class A16 : public BaseProject {
 	protected:
@@ -299,11 +306,15 @@ class A16 : public BaseProject {
 		glm::vec3 m = glm::vec3(0.0f), r = glm::vec3(0.0f);
 		glm::vec3 CarPos, CamPos;
 		float CarYaw;
+        static float CoinYaw = glm::radians(0.0f);
 		glm::mat4 World, View, Prj;
 
+<<<<<<< Updated upstream
 		const float FOVy = glm::radians(45.0f);
 		const float nearPlane = 0.1f;
 		const float farPlane = 100.0f;
+=======
+>>>>>>> Stashed changes
 
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
@@ -319,6 +330,15 @@ class A16 : public BaseProject {
 		    }
 			break;
 		case 1:
+<<<<<<< Updated upstream
+=======
+			if (handleFire)
+				GameState = 2;
+            freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+			break;
+		case 2:
+            GameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+>>>>>>> Stashed changes
 			break;
 		}
 
@@ -327,6 +347,7 @@ class A16 : public BaseProject {
 		else
 			gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 
+<<<<<<< Updated upstream
 		Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
 		Prj[1][1] *= -1;
 
@@ -334,6 +355,10 @@ class A16 : public BaseProject {
 		gubo.DlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		gubo.AmbLightColor = glm::vec3(0.1f);
 		gubo.eyePos = CamPos;
+=======
+			Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
+			Prj[1][1] *= -1;
+>>>>>>> Stashed changes
 
 		DSGubo.map(currentImage, &gubo, sizeof(gubo), 0);
 
@@ -408,6 +433,7 @@ class A16 : public BaseProject {
 		uboRoad.nMat = glm::inverse(glm::transpose(World));
 		DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 
+<<<<<<< Updated upstream
 		World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
 		uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
 		uboEnv.mvpMat = Prj * View * World; 
@@ -415,17 +441,81 @@ class A16 : public BaseProject {
 		uboEnv.nMat = glm::inverse(glm::transpose(World));
 		DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
         DSCylinder.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+=======
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			uboDwelling13.amb = 1.0f; uboDwelling13.gamma = 180.0f; uboDwelling13.sColor = glm::vec3(1.0f);
+			uboDwelling13.mvpMat = Prj * View * World;
+			uboDwelling13.mMat = World;
+			uboDwelling13.nMat = glm::inverse(glm::transpose(World));
+			DSDwelling13.map(currentImage, &uboDwelling13, sizeof(uboDwelling13), 0);
+
+			/*Assets in the OPKN section*/
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
+			uboEntertainment6.mvpMat = Prj * View * World;
+			uboEntertainment6.mMat = World;
+			uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
+			DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
+
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f));
+			uboApartment4.amb = 1.0f; uboApartment4.gamma = 180.0f; uboApartment4.sColor = glm::vec3(1.0f);
+			uboApartment4.mvpMat = Prj * View * World;
+			uboApartment4.mMat = World;
+			uboApartment4.nMat = glm::inverse(glm::transpose(World));
+			DSApartment4.map(currentImage, &uboApartment4, sizeof(uboApartment4), 0);
+
+			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
+			uboDwelling1.mvpMat = Prj * View * World;
+			uboDwelling1.mMat = World;
+			uboDwelling1.nMat = glm::inverse(glm::transpose(World));
+			DSDwelling1.map(currentImage, &uboDwelling1, sizeof(uboDwelling1), 0);
+
+			/*Road Asset*/
+			World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+			uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
+			uboRoad.mvpMat = Prj * View * World;
+			uboRoad.mMat = World;
+			uboRoad.nMat = glm::inverse(glm::transpose(World));
+			DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
+            
+            /*Coin Asset*/
+            CoinYaw -= coinRotSpeed * deltaT;
+            World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+            uboCoin.amb = 1.0f; uboCoin.gamma = 180.0f; uboCoin.sColor = glm::vec3(1.0f);
+            uboCoin.mvpMat = Prj * View * World;
+            uboCoin.mMat = World;
+            uboCoin.nMat = glm::inverse(glm::transpose(World));
+            DSCoin.map(currentImage, &uboCoin, sizeof(uboCoin), 0);
+
+			/*Environment Asset*/
+			World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+			uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
+			uboEnv.mvpMat = Prj * View * World;
+			uboEnv.mMat = World;
+			uboEnv.nMat = glm::inverse(glm::transpose(World));
+			DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+		}
+
+		uboSplash.visible = (GameState == 0) ? 1.0f : 0.0f;
+		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
+>>>>>>> Stashed changes
 	}
 
+    /*
 	void createEnvironment(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
 	void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+<<<<<<< Updated upstream
 	void gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
     void createCircleMesh(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
     
+=======
+	int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
+    */
+
+>>>>>>> Stashed changes
 };
 
-#include "Environment.hpp"
-#include "Controller.hpp"
 
 int main() {
 	A16 app;

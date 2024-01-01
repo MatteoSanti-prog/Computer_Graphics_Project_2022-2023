@@ -1,3 +1,10 @@
+<<<<<<< Updated upstream
+=======
+#pragma once
+
+#include <glm/glm.hpp>
+
+>>>>>>> Stashed changes
 class Collider {
 private:
 	float right;

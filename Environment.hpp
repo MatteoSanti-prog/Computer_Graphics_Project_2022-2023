@@ -1,7 +1,14 @@
-void A16::createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
+#pragma once
+
+#include "Structs.hpp"
+
+void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
 	
+<<<<<<< Updated upstream
     
 	const float h = 1.5f; //height
+=======
+>>>>>>> Stashed changes
 	// Base
 	vPos.push_back({ {-15, 15, 0}, {0,0,1}, {0.58f,0.74f} }); //A
 	vPos.push_back({ {15, 15, 0}, {0,0,1}, {0.6f,0.74f} }); //B
