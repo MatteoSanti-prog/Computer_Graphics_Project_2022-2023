@@ -1,16 +1,12 @@
 #include "Checkpoint.hpp"
-<<<<<<< Updated upstream
-=======
 #include "Constants.hpp"
 #include <stack>
->>>>>>> Stashed changes
 
 //Checkpoint class funtions implementation
 
 Checkpoint::Checkpoint() {}
 
 Checkpoint::Checkpoint(glm::vec3 pos, float radius) {
-    float scalingFactor = 4.0f;
     
     this->pos = pos * scalingFactor;
     this->radius = radius * scalingFactor;

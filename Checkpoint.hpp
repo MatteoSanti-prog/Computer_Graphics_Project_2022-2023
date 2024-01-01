@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-
 class Checkpoint {
     
     private:

@@ -4,16 +4,11 @@
 
 void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
 	
-<<<<<<< Updated upstream
-    
-	const float h = 1.5f; //height
-=======
->>>>>>> Stashed changes
 	// Base
-	vPos.push_back({ {-15, 15, 0}, {0,0,1}, {0.58f,0.74f} }); //A
-	vPos.push_back({ {15, 15, 0}, {0,0,1}, {0.6f,0.74f} }); //B
-	vPos.push_back({ {-15, -15, 0}, {0,0,1}, {0.58f,0.76f} }); //C
-	vPos.push_back({ {15, -15, 0}, {0,0,1}, {0.6f,0.76f} }); //D
+	vPos.push_back({ {-250, 250, 0}, {0,0,1}, {0.58f,0.74f} }); //A
+	vPos.push_back({ {250, 250, 0}, {0,0,1}, {0.6f,0.74f} }); //B
+	vPos.push_back({ {-250, -250, 0}, {0,0,1}, {0.58f,0.76f} }); //C
+	vPos.push_back({ {250, -250, 0}, {0,0,1}, {0.6f,0.76f} }); //D
 
 	// Upper part
 	vPos.push_back({ {5,1,h}, {0,0,1}, {0.40f,0.24f} }); //G 
@@ -93,52 +88,13 @@ void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vId
      
 	//Indices
 	/*Number of created squares*/
-	int n = 15;
+	int n = 1;
 	/*Number of vertices used at each iteration*/
 	int v = 4;
 	for (int i = 0; i < n; i++) {
 		vIdx.push_back(0 + v * i); vIdx.push_back(2 + v * i); vIdx.push_back(1 + v * i);
 		vIdx.push_back(1 + v * i); vIdx.push_back(2 + v * i); vIdx.push_back(3 + v * i);
 	}
-    
-}
-
-void A16::createCircleMesh(std::vector<VertexMesh> &vDef, std::vector<uint32_t> &vIdx) {
-    // The procedure fills array vDef with the positions of the vertices and of the normal vectors of the mesh
-    // The procedures also fill the array vIdx with the indices of the vertices of the triangles
-    // The primitive built here is a circle, with radius 1
-    
-    //center = 0, 0, 0
-    
-    float a_increment = 1;
-    
-    float alpha;
-    
-    int n = 360/a_increment + 1;
-    
-    //top face
-    vDef.push_back({{0, -2.5f, 0.1f}, {0.0f, 0.0f, 1.0f}, {0.6f,0.6f}});     //top center
-    
-    for(alpha=0; alpha<=360; alpha+=a_increment){
-        vDef.push_back({{0.5*cos(alpha), 0.5*sin(alpha)-2.5f, 0.1f}, {0.0f, 0.0f, 1.0f}, {0.6f,0.6f}});
-    }
-    
-    for(int i=0; i<n-1; i++){
-        vIdx.push_back(0); vIdx.push_back(i+1); vIdx.push_back(i+2);
-    }
-    
-    /*
-    //bottom face
-    vDef.push_back({{0, 5.5f, 3.0f}, {0.0f, 0.0f, -1.0f}, {0.45f,0.6f}});     //bottom center
-    
-    for(alpha=0; alpha<=360; alpha+=a_increment){
-        vDef.push_back({{cos(alpha), sin(alpha)+5.5f, 3.0f}, {0.0f, 0.0f, -1.0f}, {0.45f,0.6f}});
-    }
-    
-    for(int i=n+1; i<2*n; i++){
-        vIdx.push_back(n+1); vIdx.push_back(i+1); vIdx.push_back(i+2);
-    }
-    */
     
 }
 
