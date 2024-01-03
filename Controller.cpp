@@ -1,8 +1,9 @@
-#include "Controller.hpp"
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "Borders.hpp"
 #include "Checkpoint.hpp"
 #include "Constants.hpp"
+#include "Controller.hpp"
+#include "math.h"
 
 /*Static variable used to store the current position and direction of the camera*/
 static glm::vec3 FreeCamPos = FreeCamStartingPosition;
