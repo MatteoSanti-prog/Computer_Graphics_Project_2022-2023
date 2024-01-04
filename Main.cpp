@@ -21,7 +21,7 @@ class A16 : public BaseProject {
 
 	DescriptorSet DSGubo, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1, DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash, DSCoin;
 
-	Texture TCity, TSplash;
+	Texture TCity, TSplash, TCoin;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
@@ -119,6 +119,7 @@ class A16 : public BaseProject {
 
 		TCity.init(this, "textures/Textures_City.png");
 		TSplash.init(this, "textures/initial_screen.png");
+        TCoin.init(this, "textures/Textures_Coin.png");
 
 		GameState = 0;
 		MoveCam = true;
@@ -198,7 +199,7 @@ class A16 : public BaseProject {
         
         DSCoin.init(this, &DSLMesh, {
                     {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCity}
+                    {1, TEXTURE, 0, &TCoin}
             });
 
 		DSSplash.init(this, &DSLOverlay, {
@@ -241,6 +242,7 @@ class A16 : public BaseProject {
 
 		TCity.cleanup();
 		TSplash.cleanup();
+        TCoin.cleanup();
 
 		MCar.cleanup();
 		MApartment1.cleanup();
@@ -397,7 +399,7 @@ class A16 : public BaseProject {
 			Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
 			Prj[1][1] *= -1;
 
-			gubo.DlightDir = glm::normalize(glm::vec3(1, 2, 3));
+			gubo.DlightDir = glm::normalize(glm::vec3(1, 1, 0));
 			gubo.DlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			gubo.AmbLightColor = glm::vec3(0.1f);
 			gubo.eyePos = CamPos;
