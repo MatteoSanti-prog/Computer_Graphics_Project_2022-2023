@@ -10,23 +10,24 @@ class A16 : public BaseProject {
 
 	float Ar;
 
-	DescriptorSetLayout DSLGubo, DSLMesh, DSLOverlay;
+	DescriptorSetLayout FreeDSLGubo, GLDSLGubo, DSLMesh, DSLOverlay;
 
 	VertexDescriptor VMesh, VOverlay;
 
-	Pipeline PMesh, POverlay;
+	Pipeline FreePMesh, GLPMesh, POverlay;
 
 	Model<VertexMesh> MCar, MApartment1, MApartment2, MApartment3, MBank1, MDwellingStore1, MDwellingStore2, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEnv, MRoad, MCoin;
 	Model<VertexOverlay> MSplash;
 
-	DescriptorSet DSGubo, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1, DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash, DSCoin;
+	DescriptorSet FreeDSGubo, GLDSGubo, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1, DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash, DSCoin;
 
 	Texture TCity, TSplash, TCoin;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
 
-	GlobalUniformBlock gubo;
+	GlobalUniformBlockFree freeGubo;
+    GlobalUniformBlockGL glGubo;
 
 
 	int GameState;
@@ -40,10 +41,10 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 18;
+		uniformBlocksInPool = 19; //19
 		texturesInPool = 17;
 
-		setsInPool = 18;
+		setsInPool = 19;
 
 		Ar = (float)windowWidth / (float)windowHeight;
 	}
@@ -64,9 +65,13 @@ class A16 : public BaseProject {
 					{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
 
-		DSLGubo.init(this, {
+		FreeDSLGubo.init(this, {
 					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
 			});
+
+        GLDSLGubo.init(this, {
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+        });
 
 
 		VMesh.init(this, {
@@ -90,7 +95,8 @@ class A16 : public BaseProject {
 			});
 
 
-		PMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", { &DSLGubo, &DSLMesh });
+		FreePMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", {&FreeDSLGubo, &DSLMesh });
+        GLPMesh.init(this, &VMesh, "shaders/MeshVertNight.spv", "shaders/MeshFragNight.spv", {&GLDSLGubo, &DSLMesh });
 		POverlay.init(this, &VOverlay, "shaders/OverlayVert.spv", "shaders/OverlayFrag.spv", { &DSLOverlay });
 		POverlay.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
 			VK_CULL_MODE_NONE, false);
@@ -130,7 +136,8 @@ class A16 : public BaseProject {
 
 	void pipelinesAndDescriptorSetsInit() {
 
-		PMesh.create();
+		FreePMesh.create();
+        GLPMesh.create();
 		POverlay.create();
 
 		DSCar.init(this, &DSLMesh, {
@@ -207,15 +214,20 @@ class A16 : public BaseProject {
 					{1, TEXTURE, 0, &TSplash}
 		    });
 
-		DSGubo.init(this, &DSLGubo, {
-					{0, UNIFORM, sizeof(GlobalUniformBlock), nullptr}
+		FreeDSGubo.init(this, &FreeDSLGubo, {
+					{0, UNIFORM, sizeof(GlobalUniformBlockFree), nullptr}
 			});
+
+        GLDSGubo.init(this, &GLDSLGubo, {
+                {0, UNIFORM, sizeof(GlobalUniformBlockGL), nullptr}
+        });
 	}
 
 
 	void pipelinesAndDescriptorSetsCleanup() {
 
-		PMesh.cleanup();
+		FreePMesh.cleanup();
+        GLPMesh.cleanup();
 		POverlay.cleanup();
 
 		DSCar.cleanup();
@@ -235,7 +247,8 @@ class A16 : public BaseProject {
         DSCoin.cleanup();
 		DSEnv.cleanup();
 		DSSplash.cleanup();
-		DSGubo.cleanup();
+		FreeDSGubo.cleanup();
+        GLDSGubo.cleanup();
 	}
 
 	void localCleanup() {
@@ -262,92 +275,104 @@ class A16 : public BaseProject {
 
 		DSLMesh.cleanup();
 		DSLOverlay.cleanup();
-		DSLGubo.cleanup();
+		FreeDSLGubo.cleanup();
+        GLDSLGubo.cleanup();
 
-		PMesh.destroy();
+		FreePMesh.destroy();
+        GLPMesh.destroy();
 		POverlay.destroy();
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
-		DSGubo.bind(commandBuffer, PMesh, 0, currentImage);
+        Pipeline tempPipeline;
+        DescriptorSet tempDS;
+        if (GameState == 2) {
+            tempPipeline = GLPMesh;
+            tempDS = GLDSGubo;
+        }
+        else {
+            tempPipeline = FreePMesh;
+            tempDS = FreeDSGubo;
+        }
+        tempDS.bind(commandBuffer, tempPipeline, 0, currentImage);
 
-		PMesh.bind(commandBuffer);
+        tempPipeline.bind(commandBuffer);
 
 		MCar.bind(commandBuffer);
-		DSCar.bind(commandBuffer, PMesh, 1, currentImage);
+		DSCar.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MCar.indices.size()), 1, 0, 0, 0);
 
 		MApartment1.bind(commandBuffer);
-		DSApartment1.bind(commandBuffer, PMesh, 1, currentImage);
+		DSApartment1.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment1.indices.size()), 1, 0, 0, 0);
 
 		MApartment2.bind(commandBuffer);
-		DSApartment2.bind(commandBuffer, PMesh, 1, currentImage);
+		DSApartment2.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
-		DSApartment4.bind(commandBuffer, PMesh, 1, currentImage);
+		DSApartment4.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
 
 		MApartment3.bind(commandBuffer);
-		DSApartment3.bind(commandBuffer, PMesh, 1, currentImage);
+		DSApartment3.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MApartment3.indices.size()), 1, 0, 0, 0);
 
 
 		MBank1.bind(commandBuffer);
-		DSBank1.bind(commandBuffer, PMesh, 1, currentImage);
+		DSBank1.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MBank1.indices.size()), 1, 0, 0, 0);
 
 		MDwellingStore1.bind(commandBuffer);
-		DSDwellingStore1.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwellingStore1.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwellingStore1.indices.size()), 1, 0, 0, 0);
 
 		MDwellingStore2.bind(commandBuffer);
-		DSDwellingStore2.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwellingStore2.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwellingStore2.indices.size()), 1, 0, 0, 0);
 
 		MDwellingStore8.bind(commandBuffer);
-		DSDwellingStore8.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwellingStore8.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwellingStore8.indices.size()), 1, 0, 0, 0);
 
 		MDwelling1.bind(commandBuffer);
-		DSDwelling1.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwelling1.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwelling1.indices.size()), 1, 0, 0, 0);
 
 		MDwelling12.bind(commandBuffer);
-		DSDwelling12.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwelling12.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
-		DSDwelling13.bind(commandBuffer, PMesh, 1, currentImage);
+		DSDwelling13.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
 
 		MEntertainment6.bind(commandBuffer);
-		DSEntertainment6.bind(commandBuffer, PMesh, 1, currentImage);
+		DSEntertainment6.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MEntertainment6.indices.size()), 1, 0, 0, 0);
 
 		MRoad.bind(commandBuffer);
-		DSRoad.bind(commandBuffer, PMesh, 1, currentImage);
+		DSRoad.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0);
         
         MCoin.bind(commandBuffer);
-        DSCoin.bind(commandBuffer, PMesh, 1, currentImage);
+        DSCoin.bind(commandBuffer, tempPipeline, 1, currentImage);
         vkCmdDrawIndexed(commandBuffer,
             static_cast<uint32_t>(MCoin.indices.size()), 1, 0, 0, 0);
 
 		MEnv.bind(commandBuffer);
-		DSEnv.bind(commandBuffer, PMesh, 1, currentImage);
+		DSEnv.bind(commandBuffer, tempPipeline, 1, currentImage);
 		vkCmdDrawIndexed(commandBuffer,
 				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
 
@@ -399,12 +424,21 @@ class A16 : public BaseProject {
 			Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
 			Prj[1][1] *= -1;
 
-			gubo.DlightDir = glm::normalize(glm::vec3(1, 1, 0));
-			gubo.DlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			gubo.AmbLightColor = glm::vec3(0.1f);
-			gubo.eyePos = CamPos;
-
-			DSGubo.map(currentImage, &gubo, sizeof(gubo), 0);
+            if(GameState == 1) {
+                freeGubo.FreeDlightDir = glm::normalize(glm::vec3(1, 1, 0));
+                freeGubo.FreeDlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                freeGubo.FreeAmbLightColor = glm::vec3(0.1f);
+                freeGubo.FreeEyePos = CamPos;
+                FreeDSGubo.map(currentImage, &freeGubo, sizeof(freeGubo), 0);
+            }
+            else {
+                glGubo.GLDlightPos = CarPos;
+                glGubo.GLDlightDir = glm::rotate(glm::mat4(1), CarYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, -1, 1);
+                glGubo.GLDlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                glGubo.GLAmbLightColor = glm::vec3(0.1f);
+                glGubo.GLeyePos = CamPos;
+                GLDSGubo.map(currentImage, &glGubo, sizeof(glGubo), 0);
+            }
 
 			uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
 			uboCar.mvpMat = Prj * View * World;
@@ -528,12 +562,6 @@ class A16 : public BaseProject {
 		uboSplash.visible = (GameState == 0) ? 1.0f : 0.0f;
 		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
 	}
-
-    /*
-	void createEnvironment(std::vector<VertexMesh>& vPos, std::vector<uint32_t>& vIdx);
-	void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
-	int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos);
-    */
 
 };
 

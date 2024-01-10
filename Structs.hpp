@@ -9,11 +9,19 @@ struct MeshUniformBlock {
     alignas(16) glm::mat4 nMat;
 };
 
-struct GlobalUniformBlock {
-    alignas(16) glm::vec3 DlightDir;
-    alignas(16) glm::vec3 DlightColor;
-    alignas(16) glm::vec3 AmbLightColor;
-    alignas(16) glm::vec3 eyePos;
+struct GlobalUniformBlockFree {
+    alignas(16) glm::vec3 FreeDlightDir;
+    alignas(16) glm::vec3 FreeDlightColor;
+    alignas(16) glm::vec3 FreeAmbLightColor;
+    alignas(16) glm::vec3 FreeEyePos;
+};
+
+struct GlobalUniformBlockGL {
+    alignas(16) glm::vec3 GLDlightPos;
+    alignas(16) glm::vec3 GLDlightDir;
+    alignas(16) glm::vec3 GLDlightColor;
+    alignas(16) glm::vec3 GLAmbLightColor;
+    alignas(16) glm::vec3 GLeyePos;
 };
 
 struct OverlayUniformBlock {
