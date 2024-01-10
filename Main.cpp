@@ -403,6 +403,9 @@ class A16 : public BaseProject {
 		bool handleFire = (wasFire && (!fire));
 		wasFire = fire;
 
+        if(handleFire)
+            RebuildPipeline();
+
 		switch (GameState) {
 		case 0:
 			if (handleFire) {
