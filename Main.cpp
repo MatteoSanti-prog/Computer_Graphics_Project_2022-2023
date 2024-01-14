@@ -10,28 +10,29 @@ class A16 : public BaseProject {
 
 	float Ar;
 
-	DescriptorSetLayout FreeDSLGubo, GLDSLGubo, DSLMesh, DSLOverlay;
+	DescriptorSetLayout DSLDay, DSLNight, DSLMesh, DSLOverlay;
 
 	VertexDescriptor VMesh, VOverlay;
 
-	Pipeline FreePMesh, GLPMesh, POverlay;
+	Pipeline PMeshDay, PMeshNight, POverlay;
 
-	Model<VertexMesh> MCar, MApartment1, MApartment2, MApartment3, MBank1, MDwellingStore1, MDwellingStore2, MDwellingStore8, MDwelling1, MDwelling12, MEntertainment6, MEnv, MRoad, MCoin;
+	Model<VertexMesh> MCar, MApartment1, MApartment2, MApartment3, MBank1, MDwellingStore1, MDwellingStore2, MDwellingStore8,
+    MDwelling1, MDwelling12, MEntertainment6, MEnv, MRoad, MCoin;
 	Model<VertexOverlay> MSplash;
 
-	DescriptorSet FreeDSGubo, GLDSGubo, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1, DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash, DSCoin;
+	DescriptorSet DSDay, DSNight, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1,
+    DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
+    DSCoin;
 
 	Texture TCity, TSplash, TCoin;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
 
-	GlobalUniformBlockFree freeGubo;
-    GlobalUniformBlockGL glGubo;
+	GlobalUniformBlockNight globalUniformBlockNight;
+    GlobalUniformBlockDay globalUniformBlockDay;
 
-
-	int GameState;
-	bool MoveCam;
+	int gameState;
 
 	void setWindowParameters() {
 
@@ -41,7 +42,7 @@ class A16 : public BaseProject {
 		windowResizable = GLFW_TRUE;
 		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
 
-		uniformBlocksInPool = 19; //19
+		uniformBlocksInPool = 19;
 		texturesInPool = 17;
 
 		setsInPool = 19;
@@ -65,13 +66,13 @@ class A16 : public BaseProject {
 					{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
 
-		FreeDSLGubo.init(this, {
-					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
-			});
-
-        GLDSLGubo.init(this, {
+        DSLDay.init(this, {
                 {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
         });
+
+		DSLNight.init(this, {
+					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+			});
 
 
 		VMesh.init(this, {
@@ -95,8 +96,8 @@ class A16 : public BaseProject {
 			});
 
 
-		FreePMesh.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFrag.spv", {&FreeDSLGubo, &DSLMesh });
-        GLPMesh.init(this, &VMesh, "shaders/MeshVertNight.spv", "shaders/MeshFragNight.spv", {&GLDSLGubo, &DSLMesh });
+		PMeshDay.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFragDay.spv", {&DSLDay, &DSLMesh });
+        PMeshNight.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFragNight.spv", {&DSLNight, &DSLMesh });
 		POverlay.init(this, &VOverlay, "shaders/OverlayVert.spv", "shaders/OverlayFrag.spv", { &DSLOverlay });
 		POverlay.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
 			VK_CULL_MODE_NONE, false);
@@ -127,17 +128,15 @@ class A16 : public BaseProject {
 		TSplash.init(this, "textures/initial_screen.png");
         TCoin.init(this, "textures/Textures_Coin.png");
 
-		GameState = 0;
-		MoveCam = true;
+        gameState = 0;
 
-        //Initialize Checkpoints
         initializeCheckpoints();
 	}
 
 	void pipelinesAndDescriptorSetsInit() {
 
-		FreePMesh.create();
-        GLPMesh.create();
+		PMeshDay.create();
+        PMeshNight.create();
 		POverlay.create();
 
 		DSCar.init(this, &DSLMesh, {
@@ -214,20 +213,20 @@ class A16 : public BaseProject {
 					{1, TEXTURE, 0, &TSplash}
 		    });
 
-		FreeDSGubo.init(this, &FreeDSLGubo, {
-					{0, UNIFORM, sizeof(GlobalUniformBlockFree), nullptr}
-			});
+        DSDay.init(this, &DSLDay, {
+                {0, UNIFORM, sizeof(GlobalUniformBlockDay), nullptr}
+        });
 
-        GLDSGubo.init(this, &GLDSLGubo, {
-                {0, UNIFORM, sizeof(GlobalUniformBlockGL), nullptr}
+        DSNight.init(this, &DSLNight, {
+                {0, UNIFORM, sizeof(GlobalUniformBlockNight), nullptr}
         });
 	}
 
 
 	void pipelinesAndDescriptorSetsCleanup() {
 
-		FreePMesh.cleanup();
-        GLPMesh.cleanup();
+		PMeshDay.cleanup();
+        PMeshNight.cleanup();
 		POverlay.cleanup();
 
 		DSCar.cleanup();
@@ -247,8 +246,8 @@ class A16 : public BaseProject {
         DSCoin.cleanup();
 		DSEnv.cleanup();
 		DSSplash.cleanup();
-		FreeDSGubo.cleanup();
-        GLDSGubo.cleanup();
+		DSDay.cleanup();
+        DSNight.cleanup();
 	}
 
 	void localCleanup() {
@@ -275,112 +274,113 @@ class A16 : public BaseProject {
 
 		DSLMesh.cleanup();
 		DSLOverlay.cleanup();
-		FreeDSLGubo.cleanup();
-        GLDSLGubo.cleanup();
+        DSLDay.cleanup();
+		DSLNight.cleanup();
 
-		FreePMesh.destroy();
-        GLPMesh.destroy();
+		PMeshDay.destroy();
+        PMeshNight.destroy();
 		POverlay.destroy();
 	}
 
+    void switchPipeline(VkCommandBuffer commandBuffer, int currentImage, Pipeline currPipeline, DescriptorSet currDs) {
+
+        currDs.bind(commandBuffer, currPipeline, 0, currentImage);
+
+        currPipeline.bind(commandBuffer);
+
+        MCar.bind(commandBuffer);
+        DSCar.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MCar.indices.size()), 1, 0, 0, 0);
+
+        MApartment1.bind(commandBuffer);
+        DSApartment1.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MApartment1.indices.size()), 1, 0, 0, 0);
+
+        MApartment2.bind(commandBuffer);
+        DSApartment2.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
+        DSApartment4.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
+
+        MApartment3.bind(commandBuffer);
+        DSApartment3.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MApartment3.indices.size()), 1, 0, 0, 0);
+
+
+        MBank1.bind(commandBuffer);
+        DSBank1.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MBank1.indices.size()), 1, 0, 0, 0);
+
+        MDwellingStore1.bind(commandBuffer);
+        DSDwellingStore1.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwellingStore1.indices.size()), 1, 0, 0, 0);
+
+        MDwellingStore2.bind(commandBuffer);
+        DSDwellingStore2.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwellingStore2.indices.size()), 1, 0, 0, 0);
+
+        MDwellingStore8.bind(commandBuffer);
+        DSDwellingStore8.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwellingStore8.indices.size()), 1, 0, 0, 0);
+
+        MDwelling1.bind(commandBuffer);
+        DSDwelling1.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwelling1.indices.size()), 1, 0, 0, 0);
+
+        MDwelling12.bind(commandBuffer);
+        DSDwelling12.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
+        DSDwelling13.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
+
+        MEntertainment6.bind(commandBuffer);
+        DSEntertainment6.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MEntertainment6.indices.size()), 1, 0, 0, 0);
+
+        MRoad.bind(commandBuffer);
+        DSRoad.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0);
+
+        MCoin.bind(commandBuffer);
+        DSCoin.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MCoin.indices.size()), 1, 0, 0, 0);
+
+        MEnv.bind(commandBuffer);
+        DSEnv.bind(commandBuffer, currPipeline, 1, currentImage);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+    }
+
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
-        Pipeline tempPipeline;
-        DescriptorSet tempDS;
-        if (GameState == 2) {
-            tempPipeline = GLPMesh;
-            tempDS = GLDSGubo;
-        }
-        else {
-            tempPipeline = FreePMesh;
-            tempDS = FreeDSGubo;
-        }
-        tempDS.bind(commandBuffer, tempPipeline, 0, currentImage);
-
-        tempPipeline.bind(commandBuffer);
-
-		MCar.bind(commandBuffer);
-		DSCar.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MCar.indices.size()), 1, 0, 0, 0);
-
-		MApartment1.bind(commandBuffer);
-		DSApartment1.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MApartment1.indices.size()), 1, 0, 0, 0);
-
-		MApartment2.bind(commandBuffer);
-		DSApartment2.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
-		DSApartment4.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MApartment2.indices.size()), 1, 0, 0, 0);
-
-		MApartment3.bind(commandBuffer);
-		DSApartment3.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MApartment3.indices.size()), 1, 0, 0, 0);
-
-
-		MBank1.bind(commandBuffer);
-		DSBank1.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MBank1.indices.size()), 1, 0, 0, 0);
-
-		MDwellingStore1.bind(commandBuffer);
-		DSDwellingStore1.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwellingStore1.indices.size()), 1, 0, 0, 0);
-
-		MDwellingStore2.bind(commandBuffer);
-		DSDwellingStore2.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwellingStore2.indices.size()), 1, 0, 0, 0);
-
-		MDwellingStore8.bind(commandBuffer);
-		DSDwellingStore8.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwellingStore8.indices.size()), 1, 0, 0, 0);
-
-		MDwelling1.bind(commandBuffer);
-		DSDwelling1.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwelling1.indices.size()), 1, 0, 0, 0);
-
-		MDwelling12.bind(commandBuffer);
-		DSDwelling12.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
-		DSDwelling13.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MDwelling12.indices.size()), 1, 0, 0, 0);
-
-		MEntertainment6.bind(commandBuffer);
-		DSEntertainment6.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MEntertainment6.indices.size()), 1, 0, 0, 0);
-
-		MRoad.bind(commandBuffer);
-		DSRoad.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MRoad.indices.size()), 1, 0, 0, 0);
-        
-        MCoin.bind(commandBuffer);
-        DSCoin.bind(commandBuffer, tempPipeline, 1, currentImage);
+        POverlay.bind(commandBuffer);
+        MSplash.bind(commandBuffer);
+        DSSplash.bind(commandBuffer, POverlay, 0, currentImage);
         vkCmdDrawIndexed(commandBuffer,
-            static_cast<uint32_t>(MCoin.indices.size()), 1, 0, 0, 0);
+                         static_cast<uint32_t>(MSplash.indices.size()), 1, 0, 0, 0);
 
-		MEnv.bind(commandBuffer);
-		DSEnv.bind(commandBuffer, tempPipeline, 1, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-				static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
-
-		POverlay.bind(commandBuffer);
-		MSplash.bind(commandBuffer);
-		DSSplash.bind(commandBuffer, POverlay, 0, currentImage);
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(MSplash.indices.size()), 1, 0, 0, 0);
+        /*Depending on the state of the game we choose which pipeline to use*/
+        if (gameState == 1) {
+            switchPipeline(commandBuffer, currentImage, PMeshDay, DSDay);
+        }
+        if (gameState == 2) {
+            switchPipeline(commandBuffer, currentImage, PMeshNight, DSNight);
+        }
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -403,147 +403,142 @@ class A16 : public BaseProject {
 		bool handleFire = (wasFire && (!fire));
 		wasFire = fire;
 
-        if(handleFire)
-            RebuildPipeline();
-
-		switch (GameState) {
+		switch (gameState) {
 		case 0:
 			if (handleFire) {
-				GameState = 1;
+                gameState = 1;
+                RebuildPipeline();
 			}
 			break;
 		case 1:
-			if (handleFire)
-				GameState = 2;
+            globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
+            globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            globalUniformBlockDay.ambLightColor = glm::vec3(0.1f);
+            globalUniformBlockDay.eyePos = CamPos;
+            DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
             freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+            if (handleFire) {
+                gameState = 2;
+                RebuildPipeline();
+            }
 			break;
 		case 2:
-            GameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+            globalUniformBlockNight.lightPos = CarPos;
+            globalUniformBlockNight.lightDir = glm::vec3(sin(CarYaw), 0.0f, cos(CarYaw));
+            globalUniformBlockNight.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            globalUniformBlockNight.ambLightColor = glm::vec3(0.1f);
+            globalUniformBlockNight.eyePos = CamPos;
+            DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
+            gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 			break;
 		}
 
-		if (GameState != 0) {
+        Prj = glm::perspective(fovy, Ar, nearPlane, farPlane);
+        Prj[1][1] *= -1;
 
-			Prj = glm::perspective(FOVy, Ar, nearPlane, farPlane);
-			Prj[1][1] *= -1;
+        if(gameState != 0){
 
-            if(GameState == 1) {
-                freeGubo.FreeDlightDir = glm::normalize(glm::vec3(1, 1, 0));
-                freeGubo.FreeDlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                freeGubo.FreeAmbLightColor = glm::vec3(0.1f);
-                freeGubo.FreeEyePos = CamPos;
-                FreeDSGubo.map(currentImage, &freeGubo, sizeof(freeGubo), 0);
-            }
-            else {
-                glGubo.GLDlightPos = CarPos;
-                glGubo.GLDlightDir = glm::rotate(glm::mat4(1), CarYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, -1, 1);
-                glGubo.GLDlightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                glGubo.GLAmbLightColor = glm::vec3(0.1f);
-                glGubo.GLeyePos = CamPos;
-                GLDSGubo.map(currentImage, &glGubo, sizeof(glGubo), 0);
-            }
+            uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
+            uboCar.mvpMat = Prj * View * World;
+            uboCar.mMat = World;
+            uboCar.nMat = glm::inverse(glm::transpose(World));
+            DSCar.map(currentImage, &uboCar, sizeof(uboCar), 0);
 
-			uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
-			uboCar.mvpMat = Prj * View * World;
-			uboCar.mMat = World;
-			uboCar.nMat = glm::inverse(glm::transpose(World));
-			DSCar.map(currentImage, &uboCar, sizeof(uboCar), 0);
+            /*Assets in the GFHE section*/
+            World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboApartment1.amb = 1.0f; uboApartment1.gamma = 180.0f; uboApartment1.sColor = glm::vec3(1.0f);
+            uboApartment1.mvpMat = Prj * View * World;
+            uboApartment1.mMat = World;
+            uboApartment1.nMat = glm::inverse(glm::transpose(World));
+            DSApartment1.map(currentImage, &uboApartment1, sizeof(uboApartment1), 0);
 
-			/*Assets in the GFHE section*/
-			World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboApartment1.amb = 1.0f; uboApartment1.gamma = 180.0f; uboApartment1.sColor = glm::vec3(1.0f);
-			uboApartment1.mvpMat = Prj * View * World;
-			uboApartment1.mMat = World;
-			uboApartment1.nMat = glm::inverse(glm::transpose(World));
-			DSApartment1.map(currentImage, &uboApartment1, sizeof(uboApartment1), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 6.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.sColor = glm::vec3(1.0f);
+            uboDwellingStore1.mvpMat = Prj * View * World;
+            uboDwellingStore1.mMat = World;
+            uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
+            DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 6.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.sColor = glm::vec3(1.0f);
-			uboDwellingStore1.mvpMat = Prj * View * World;
-			uboDwellingStore1.mMat = World;
-			uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
-			DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 11.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.sColor = glm::vec3(1.0f);
+            uboDwellingStore8.mvpMat = Prj * View * World;
+            uboDwellingStore8.mMat = World;
+            uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
+            DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 11.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.sColor = glm::vec3(1.0f);
-			uboDwellingStore8.mvpMat = Prj * View * World;
-			uboDwellingStore8.mMat = World;
-			uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
-			DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 25.5f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwellingStore2.amb = 1.0f; uboDwellingStore2.gamma = 180.0f; uboDwellingStore2.sColor = glm::vec3(1.0f);
+            uboDwellingStore2.mvpMat = Prj * View * World;
+            uboDwellingStore2.mMat = World;
+            uboDwellingStore2.nMat = glm::inverse(glm::transpose(World));
+            DSDwellingStore2.map(currentImage, &uboDwellingStore2, sizeof(uboDwellingStore2), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 25.5f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwellingStore2.amb = 1.0f; uboDwellingStore2.gamma = 180.0f; uboDwellingStore2.sColor = glm::vec3(1.0f);
-			uboDwellingStore2.mvpMat = Prj * View * World;
-			uboDwellingStore2.mMat = World;
-			uboDwellingStore2.nMat = glm::inverse(glm::transpose(World));
-			DSDwellingStore2.map(currentImage, &uboDwellingStore2, sizeof(uboDwellingStore2), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 18.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f; uboDwelling12.sColor = glm::vec3(1.0f);
+            uboDwelling12.mvpMat = Prj * View * World;
+            uboDwelling12.mMat = World;
+            uboDwelling12.nMat = glm::inverse(glm::transpose(World));
+            DSDwelling12.map(currentImage, &uboDwelling12, sizeof(uboDwelling12), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 18.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f; uboDwelling12.sColor = glm::vec3(1.0f);
-			uboDwelling12.mvpMat = Prj * View * World;
-			uboDwelling12.mMat = World;
-			uboDwelling12.nMat = glm::inverse(glm::transpose(World));
-			DSDwelling12.map(currentImage, &uboDwelling12, sizeof(uboDwelling12), 0);
+            /*Assets in the RJQG section*/
+            World = glm::translate(glm::mat4(1.0), glm::vec3(12.5f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboApartment3.amb = 1.0f; uboApartment3.gamma = 180.0f; uboApartment3.sColor = glm::vec3(1.0f);
+            uboApartment3.mvpMat = Prj * View * World;
+            uboApartment3.mMat = World;
+            uboApartment3.nMat = glm::inverse(glm::transpose(World));
+            DSApartment3.map(currentImage, &uboApartment3, sizeof(uboApartment3), 0);
 
-			/*Assets in the RJQG section*/
-			World = glm::translate(glm::mat4(1.0), glm::vec3(12.5f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboApartment3.amb = 1.0f; uboApartment3.gamma = 180.0f; uboApartment3.sColor = glm::vec3(1.0f);
-			uboApartment3.mvpMat = Prj * View * World;
-			uboApartment3.mMat = World;
-			uboApartment3.nMat = glm::inverse(glm::transpose(World));
-			DSApartment3.map(currentImage, &uboApartment3, sizeof(uboApartment3), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(5.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboApartment2.amb = 1.0f; uboApartment2.gamma = 180.0f; uboApartment2.sColor = glm::vec3(1.0f);
+            uboApartment2.mvpMat = Prj * View * World;
+            uboApartment2.mMat = World;
+            uboApartment2.nMat = glm::inverse(glm::transpose(World));
+            DSApartment2.map(currentImage, &uboApartment2, sizeof(uboApartment2), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(5.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboApartment2.amb = 1.0f; uboApartment2.gamma = 180.0f; uboApartment2.sColor = glm::vec3(1.0f);
-			uboApartment2.mvpMat = Prj * View * World;
-			uboApartment2.mMat = World;
-			uboApartment2.nMat = glm::inverse(glm::transpose(World));
-			DSApartment2.map(currentImage, &uboApartment2, sizeof(uboApartment2), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(-2.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboBank1.amb = 1.0f; uboBank1.gamma = 180.0f; uboBank1.sColor = glm::vec3(1.0f);
+            uboBank1.mvpMat = Prj * View * World;
+            uboBank1.mMat = World;
+            uboBank1.nMat = glm::inverse(glm::transpose(World));
+            DSBank1.map(currentImage, &uboBank1, sizeof(uboBank1), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(-2.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboBank1.amb = 1.0f; uboBank1.gamma = 180.0f; uboBank1.sColor = glm::vec3(1.0f);
-			uboBank1.mvpMat = Prj * View * World;
-			uboBank1.mMat = World;
-			uboBank1.nMat = glm::inverse(glm::transpose(World));
-			DSBank1.map(currentImage, &uboBank1, sizeof(uboBank1), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwelling13.amb = 1.0f; uboDwelling13.gamma = 180.0f; uboDwelling13.sColor = glm::vec3(1.0f);
+            uboDwelling13.mvpMat = Prj * View * World;
+            uboDwelling13.mMat = World;
+            uboDwelling13.nMat = glm::inverse(glm::transpose(World));
+            DSDwelling13.map(currentImage, &uboDwelling13, sizeof(uboDwelling13), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwelling13.amb = 1.0f; uboDwelling13.gamma = 180.0f; uboDwelling13.sColor = glm::vec3(1.0f);
-			uboDwelling13.mvpMat = Prj * View * World;
-			uboDwelling13.mMat = World;
-			uboDwelling13.nMat = glm::inverse(glm::transpose(World));
-			DSDwelling13.map(currentImage, &uboDwelling13, sizeof(uboDwelling13), 0);
+            /*Assets in the OPKN section*/
+            World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
+            uboEntertainment6.mvpMat = Prj * View * World;
+            uboEntertainment6.mMat = World;
+            uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
+            DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
 
-			/*Assets in the OPKN section*/
-			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
-			uboEntertainment6.mvpMat = Prj * View * World;
-			uboEntertainment6.mMat = World;
-			uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
-			DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f));
+            uboApartment4.amb = 1.0f; uboApartment4.gamma = 180.0f; uboApartment4.sColor = glm::vec3(1.0f);
+            uboApartment4.mvpMat = Prj * View * World;
+            uboApartment4.mMat = World;
+            uboApartment4.nMat = glm::inverse(glm::transpose(World));
+            DSApartment4.map(currentImage, &uboApartment4, sizeof(uboApartment4), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f));
-			uboApartment4.amb = 1.0f; uboApartment4.gamma = 180.0f; uboApartment4.sColor = glm::vec3(1.0f);
-			uboApartment4.mvpMat = Prj * View * World;
-			uboApartment4.mMat = World;
-			uboApartment4.nMat = glm::inverse(glm::transpose(World));
-			DSApartment4.map(currentImage, &uboApartment4, sizeof(uboApartment4), 0);
+            World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
+            uboDwelling1.mvpMat = Prj * View * World;
+            uboDwelling1.mMat = World;
+            uboDwelling1.nMat = glm::inverse(glm::transpose(World));
+            DSDwelling1.map(currentImage, &uboDwelling1, sizeof(uboDwelling1), 0);
 
-			World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
-			uboDwelling1.mvpMat = Prj * View * World;
-			uboDwelling1.mMat = World;
-			uboDwelling1.nMat = glm::inverse(glm::transpose(World));
-			DSDwelling1.map(currentImage, &uboDwelling1, sizeof(uboDwelling1), 0);
+            /*Road Asset*/
+            World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+            uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
+            uboRoad.mvpMat = Prj * View * World;
+            uboRoad.mMat = World;
+            uboRoad.nMat = glm::inverse(glm::transpose(World));
+            DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
 
-			/*Road Asset*/
-			World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-			uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
-			uboRoad.mvpMat = Prj * View * World;
-			uboRoad.mMat = World;
-			uboRoad.nMat = glm::inverse(glm::transpose(World));
-			DSRoad.map(currentImage, &uboRoad, sizeof(uboRoad), 0);
-            
             /*Coin Asset*/
             CoinYaw -= coinRotSpeed * deltaT;
             World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
@@ -553,16 +548,16 @@ class A16 : public BaseProject {
             uboCoin.nMat = glm::inverse(glm::transpose(World));
             DSCoin.map(currentImage, &uboCoin, sizeof(uboCoin), 0);
 
-			/*Environment Asset*/
-			World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-			uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
-			uboEnv.mvpMat = Prj * View * World;
-			uboEnv.mMat = World;
-			uboEnv.nMat = glm::inverse(glm::transpose(World));
-			DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
-		}
+            /*Environment Asset*/
+            World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+            uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
+            uboEnv.mvpMat = Prj * View * World;
+            uboEnv.mMat = World;
+            uboEnv.nMat = glm::inverse(glm::transpose(World));
+            DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
+        }
 
-		uboSplash.visible = (GameState == 0) ? 1.0f : 0.0f;
+		uboSplash.visible = (gameState == 0) ? 1.0f : 0.0f;
 		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
 	}
 

@@ -67,7 +67,7 @@ std::stack<Checkpoint> checkpoints;
 //Functions implementation
 
 void initializeCheckpoints(){
-    
+    /*
     checkpoints.push(c12);
     checkpoints.push(c11);
     checkpoints.push(c10);
@@ -79,6 +79,7 @@ void initializeCheckpoints(){
     checkpoints.push(c4);
     checkpoints.push(c3);
     checkpoints.push(c2);
+     */
     checkpoints.push(c1);
     
     

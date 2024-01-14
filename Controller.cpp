@@ -7,68 +7,68 @@
 
 /*FREE CAM VARIABLES*/
 /*Static variable used to store the current position and direction of the camera*/
-static glm::vec3 FreeCamPos = FreeCamStartingPosition;
-static float FreeCamYaw = 0.0f;
-static float FreeCamPitch = 0.0f;
+static glm::vec3 freeCamPos = freeCamStartingPosition;
+static float freeCamYaw = 0.0f;
+static float freeCamPitch = 0.0f;
 /*Static variables used to perform dumping*/
-static glm::vec3 FreeCamPosOld = FreeCamStartingPosition;
-static glm::vec3 FreeCamPosNew = FreeCamStartingPosition;
+static glm::vec3 freeCamPosOld = freeCamStartingPosition;
+static glm::vec3 freeCamPosNew = freeCamStartingPosition;
 
 /*GAME LOGIC VARIABLES*/
 /*Static variables used to store current position and direction both for the car and for the camera*/
-static float GLLocalCarYaw = CarStartingDirection;
-static glm::vec3 GLLocalCamPos, GLLocalCarPos = CarStartingPosition, GLOldCarPos = CarStartingPosition;
-static float GLCamPitch = glm::radians(10.0f);
+static float glLocalCarYaw = carStartingDirection;
+static glm::vec3 glLocalCamPos, glLocalCarPos = carStartingPosition, glOldCarPos = carStartingPosition;
+static float glCamPitch = glm::radians(10.0f);
 /*Static variables used to perform dumping*/
-static glm::vec3 GLCamPosOld = CarStartingPosition;
-static glm::vec3 GLCamPosNew;
+static glm::vec3 glCamPosOld = carStartingPosition;
+static glm::vec3 glCamPosNew;
 /*Static variables used to store the current translational and rotational speed of the car*/
-static float GLMovSpeed = 0.0f;
-static float GLRotSpeed = glm::radians(0.0f);
+static float glMovSpeed = 0.0f;
+static float glRotSpeed = glm::radians(0.0f);
 
 /*Static variable used to store the translational speed of the car in the previous frame*/
-static float GLLastMovSpeed = 0.0f;
+static float glLastMovSpeed = 0.0f;
 
 void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
 
     /*3D vectors which represent the unitary movement in each axis (here the direction of the camera determines these three vectors)*/
-    glm::vec3 ux = glm::rotate(glm::mat4(1.0f), FreeCamYaw, glm::vec3(0, 1, 0)) * glm::vec4(1, 0, 0, 1);
+    glm::vec3 ux = glm::rotate(glm::mat4(1.0f), freeCamYaw, glm::vec3(0, 1, 0)) * glm::vec4(1, 0, 0, 1);
     glm::vec3 uy = glm::vec3(0, 1, 0);
-    glm::vec3 uz = glm::rotate(glm::mat4(1.0f), FreeCamYaw, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1);
+    glm::vec3 uz = glm::rotate(glm::mat4(1.0f), freeCamYaw, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1);
 
     /*Update the direction of the camera*/
-    FreeCamYaw += -FreeRotSpeed * deltaT * r.y;
-    FreeCamPitch += -FreeRotSpeed * deltaT * r.x;
+    freeCamYaw += -freeRotSpeed * deltaT * r.y;
+    freeCamPitch += -freeRotSpeed * deltaT * r.x;
 
     /*Bind the pitch angle of the camera*/
-    FreeCamPitch = FreeCamPitch < FreeMinPitch ? FreeMinPitch :
-        (FreeCamPitch > FreeMaxPitch ? FreeMaxPitch : FreeCamPitch);
+    freeCamPitch = freeCamPitch < freeMinPitch ? freeMinPitch :
+                   (freeCamPitch > freeMaxPitch ? freeMaxPitch : freeCamPitch);
 
     /*Update the movement of the camera*/
-    FreeCamPosNew += FreeMovSpeed * m.x * ux * deltaT;
-    FreeCamPosNew += FreeMovSpeed * m.y * uy * deltaT;
-    FreeCamPosNew += FreeMovSpeed * m.z * uz * deltaT;
+    freeCamPosNew += freeMovSpeed * m.x * ux * deltaT;
+    freeCamPosNew += freeMovSpeed * m.y * uy * deltaT;
+    freeCamPosNew += freeMovSpeed * m.z * uz * deltaT;
     
     /*Bind the elevation of the camera*/
-    FreeCamPosNew.y = FreeCamPosNew.y < 0.5f ? 0.5f : FreeCamPosNew.y;
+    freeCamPosNew.y = freeCamPosNew.y < 0.5f ? 0.5f : freeCamPosNew.y;
 
     /*Check if the position of the camera does not collide with the objects in the scene*/
-    if (!validPosition(FreeCamPosNew))
-        FreeCamPosNew = FreeCamPosOld;
+    if (!validPosition(freeCamPosNew))
+        freeCamPosNew = freeCamPosOld;
 
     /*Update the position of the camera using dumping*/
-    FreeCamPos = FreeCamPosOld * exp(-lambda * deltaT) + FreeCamPosNew * (1 - exp(-lambda * deltaT));
+    freeCamPos = freeCamPosOld * exp(-lambda * deltaT) + freeCamPosNew * (1 - exp(-lambda * deltaT));
 
     /*Create a View Matrix using the direction and the movement of the camera updated before. The model used is look-in*/
-    ViewMatrix = glm::rotate(glm::mat4(1.0), -FreeCamPitch, glm::vec3(1, 0, 0)) *
-        glm::rotate(glm::mat4(1.0), -FreeCamYaw, glm::vec3(0, 1, 0)) *
-        glm::translate(glm::mat4(1.0), -FreeCamPos);
+    ViewMatrix = glm::rotate(glm::mat4(1.0), -freeCamPitch, glm::vec3(1, 0, 0)) *
+                 glm::rotate(glm::mat4(1.0), -freeCamYaw, glm::vec3(0, 1, 0)) *
+                 glm::translate(glm::mat4(1.0), -freeCamPos);
 
     /*Update value for dumping*/
-    FreeCamPosOld = FreeCamPos;
+    freeCamPosOld = freeCamPos;
 
     /*Update the output variables (car position and car direction are fixed)*/
-    CamPos = FreeCamPos;
+    CamPos = freeCamPos;
     CarPos = glm::vec3(-38.0f, 0.0, 4.0f);
     CarYaw = glm::radians(0.0f);
 
@@ -91,108 +91,108 @@ Its parameters are:
 int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos) {
 
     /*Floating point variables used to store translational and rotational accelerations (and decelerations)*/
-    float MovAcceleration, MovDeceleration, RotAcceleration, RotDeceleration;
+    float movAcceleration, movDeceleration, motAcceleration, rotDeceleration;
 
     /*Floating point variable used to store normalized translational speed*/
-    float NormMovSpeed;
+    float normMovSpeed;
 
     /*3D vector used to store the point of the car followed by the camera*/
     glm::vec3 Target;
 
     /*3D vector which represents the unitary movement along z-axis (here the direction of the car determines this vector)*/
-    glm::vec3 uz = glm::vec3(glm::rotate(glm::mat4(1), GLLocalCarYaw, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1));
+    glm::vec3 uz = glm::vec3(glm::rotate(glm::mat4(1), glLocalCarYaw, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1));
 
     /*Update and bind the pitch angle of the camera*/
-    GLCamPitch += -GLRotSpeedPitch * r.x * deltaT;
-    GLCamPitch = GLCamPitch < GLMinPitch ? GLMinPitch :
-                 (GLCamPitch > GLMaxPitch ? GLMaxPitch : GLCamPitch);
+    glCamPitch += -glRotSpeedPitch * r.x * deltaT;
+    glCamPitch = glCamPitch < glMinPitch ? glMinPitch :
+                 (glCamPitch > glMaxPitch ? glMaxPitch : glCamPitch);
 
     /*STEERING OF THE CAR*/
 
     /*Update the rotational accelerations (the update depends on the status of the key used for rotation)*/
-    RotDeceleration = r.y != 0 ? 0.0f : -GLRotSpeed * CarPowerSteeringFactor;
+    rotDeceleration = r.y != 0 ? 0.0f : -glRotSpeed * carPowerSteeringFactor;
     
     /*Update the rotational acceleration and bind the rotational speed of the car (the update depends on the status of the key used for translation*/
-    RotAcceleration = m.z > 0.0f ? CarRotAccFactorForward : CarRotAccFactorBackward;
+    motAcceleration = m.z > 0.0f ? carRotAccFactorForward : carRotAccFactorBackward;
     
     /*Update the rotational speed*/
-    GLRotSpeed = GLRotSpeed > CarMaxRotSpeed ? CarMaxRotSpeed :
-                 (GLRotSpeed < -CarMaxRotSpeed ? -CarMaxRotSpeed : GLRotSpeed + (r.y * RotAcceleration + RotDeceleration) * deltaT);
+    glRotSpeed = glRotSpeed > carMaxRotSpeed ? carMaxRotSpeed :
+                 (glRotSpeed < -carMaxRotSpeed ? -carMaxRotSpeed : glRotSpeed + (r.y * motAcceleration + rotDeceleration) * deltaT);
 
     /*TRANSLATION OF THE CAR*/
 
     /*Update the normalized translational speed (the update depends on the sign of the translational speed of the car)*/
-    NormMovSpeed = GLMovSpeed >= 0 ? GLMovSpeed / CarMaxMovSpeedForward : GLMovSpeed / CarMaxMovSpeedBackward;
+    normMovSpeed = glMovSpeed >= 0 ? glMovSpeed / carMaxMovSpeedForward : glMovSpeed / carMaxMovSpeedBackward;
 
     /*Update the translational accelerations (the update depends on the status of the key used for acceleration)*/
-    MovDeceleration = m.z != 0 ? 0.0f : -GLMovSpeed * CarMotorBrakeFactor;
-    MovAcceleration = m.z > 0.0f ? CarMovAccFactorForward :
-                      (m.z < 0.0f ? CarMovAccFactorBackward : 0.0f);
+    movDeceleration = m.z != 0 ? 0.0f : -glMovSpeed * carMotorBrakeFactor;
+    movAcceleration = m.z > 0.0f ? carMovAccFactorForward :
+                      (m.z < 0.0f ? carMovAccFactorBackward : 0.0f);
 
     /*Update and bind the translational speed of the car*/
-    GLMovSpeed = GLMovSpeed > CarMaxMovSpeedForward ? CarMaxMovSpeedForward :
-                 (GLMovSpeed < -CarMaxMovSpeedBackward ? -CarMaxMovSpeedBackward : GLMovSpeed + (m.z * MovAcceleration + MovDeceleration) * deltaT);
+    glMovSpeed = glMovSpeed > carMaxMovSpeedForward ? carMaxMovSpeedForward :
+                 (glMovSpeed < -carMaxMovSpeedBackward ? -carMaxMovSpeedBackward : glMovSpeed + (m.z * movAcceleration + movDeceleration) * deltaT);
 
     /*If the translational speed reaches a certain threshold, its value becomes zero*/
-    GLMovSpeed = GLMovSpeed < CarMinSpeedThreshold && GLLastMovSpeed >= CarMinSpeedThreshold ? 0.0f :
-                 (GLMovSpeed > -CarMinSpeedThreshold && GLLastMovSpeed <= -CarMinSpeedThreshold ? 0.0f : GLMovSpeed);
+    glMovSpeed = glMovSpeed < carMinSpeedThreshold && glLastMovSpeed >= carMinSpeedThreshold ? 0.0f :
+                 (glMovSpeed > -carMinSpeedThreshold && glLastMovSpeed <= -carMinSpeedThreshold ? 0.0f : glMovSpeed);
 
     /*Update the translational speed of the previous frame*/
-    GLLastMovSpeed = GLMovSpeed;
+    glLastMovSpeed = glMovSpeed;
     
     /*Update the direction of the car using an interpolation method in order to have a more realistic movement*/
-    GLLocalCarYaw = glm::mix(GLLocalCarYaw, GLLocalCarYaw - GLRotSpeed * deltaT, NormMovSpeed);
+    glLocalCarYaw = glm::mix(glLocalCarYaw, glLocalCarYaw - glRotSpeed * deltaT, normMovSpeed);
 
     /*Update the position of the car*/
-    GLLocalCarPos += uz * GLMovSpeed * deltaT;
-    if (!validPosition(GLLocalCarPos)) {
-        GLLocalCarPos = GLOldCarPos;
-        GLMovSpeed = 0.0f;
+    glLocalCarPos += uz * glMovSpeed * deltaT;
+    if (!validPosition(glLocalCarPos)) {
+        glLocalCarPos = glOldCarPos;
+        glMovSpeed = 0.0f;
     }
 
     /*Check the checkpoints*/
-    if(trackCheckpoints(GLLocalCarPos)){
-        GLLocalCarPos = CarStartingPosition;
-        GLLocalCarYaw = CarStartingDirection;
-        GLMovSpeed = 0.0f;
+    if(trackCheckpoints(glLocalCarPos)){
+        glLocalCarPos = carStartingPosition;
+        glLocalCarYaw = carStartingDirection;
+        glMovSpeed = 0.0f;
         
         initializeCheckpoints();
         resetFreeCam();
-        return 0; //Reset GameState to 0 (SplashArt)
+        return 0; //Reset gameState to 0 (SplashArt)
     }
         
     /*Create a World Matrix for the car*/
-    WorldMatrix = glm::translate(glm::mat4(1.0), GLLocalCarPos) * glm::rotate(glm::mat4(1.0), GLLocalCarYaw, glm::vec3(0, 1, 0));
+    WorldMatrix = glm::translate(glm::mat4(1.0), glLocalCarPos) * glm::rotate(glm::mat4(1.0), glLocalCarYaw, glm::vec3(0, 1, 0));
 
     /*Update the position of the camera using dumping*/
-    GLCamPosNew = WorldMatrix * glm::vec4(0.0f, GLCamHeight + GLCamDist * sin(GLCamPitch), GLCamDist * cos(GLCamPitch), 1.0f);
-    Target = WorldMatrix * glm::vec4(0, 0, 0, 1.0f) + glm::vec4(0, GLCamHeight, 0, 0);
-    GLLocalCamPos = GLCamPosOld * exp(-lambda * deltaT) + GLCamPosNew * (1 - exp(-lambda * deltaT));
-    if (!validPosition(GLLocalCamPos))
-        GLLocalCamPos = GLCamPosOld;
+    glCamPosNew = WorldMatrix * glm::vec4(0.0f, gLCamHeight + gLCamDist * sin(glCamPitch), gLCamDist * cos(glCamPitch), 1.0f);
+    Target = WorldMatrix * glm::vec4(0, 0, 0, 1.0f) + glm::vec4(0, gLCamHeight, 0, 0);
+    glLocalCamPos = glCamPosOld * exp(-lambda * deltaT) + glCamPosNew * (1 - exp(-lambda * deltaT));
+    if (!validPosition(glLocalCamPos))
+        glLocalCamPos = glCamPosOld;
 
     /*Create a View Matrix using a look at model*/
-    ViewMatrix = glm::lookAt(GLLocalCamPos, Target, glm::vec3(0.0f, 1.0f, 0.0f));
+    ViewMatrix = glm::lookAt(glLocalCamPos, Target, glm::vec3(0.0f, 1.0f, 0.0f));
 
     /*Update value for dumping*/
-    GLCamPosOld = GLLocalCamPos;
+    glCamPosOld = glLocalCamPos;
 
     /*Update the output variables (car position and car direction are fixed)*/
-    CamPos = GLLocalCamPos;
-    CarPos = GLLocalCarPos;
-    CarYaw = GLLocalCarYaw;
+    CamPos = glLocalCamPos;
+    CarPos = glLocalCarPos;
+    CarYaw = glLocalCarYaw;
 
     /*Create again a World Matrix for the car where the model is rotated consistently with respect to the view*/
-    WorldMatrix = glm::translate(glm::mat4(1.0), GLLocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + GLLocalCarYaw, glm::vec3(0, 1, 0));
+    WorldMatrix = glm::translate(glm::mat4(1.0), glLocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + glLocalCarYaw, glm::vec3(0, 1, 0));
 
-    GLOldCarPos = GLLocalCarPos;
+    glOldCarPos = glLocalCarPos;
     
     return 2;
 }
 
 void resetFreeCam(){
-    FreeCamPosOld = FreeCamStartingPosition;
-    FreeCamPosNew = FreeCamStartingPosition;
-    FreeCamYaw = 0.0f;
-    FreeCamPitch = 0.0f;
+    freeCamPosOld = freeCamStartingPosition;
+    freeCamPosNew = freeCamStartingPosition;
+    freeCamYaw = 0.0f;
+    freeCamPitch = 0.0f;
 }
