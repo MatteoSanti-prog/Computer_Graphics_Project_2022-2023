@@ -29,7 +29,7 @@ const glm::vec3 freeCamStartingPosition = glm::vec3(0.0f, 2.0f, 7.0f);
 
 //Controller - game logic
 /*Constants used for setting the initial position and the initial direction of the car*/
-const glm::vec3 carStartingPosition = glm::vec3(-38.0f, 0.0, 4.0f);
+const glm::vec3 carStartingPosition = glm::vec3(-38.0f, 0.1, 4.0f);
 const float carStartingDirection = glm::radians(180.0f);
 
 /*Constants representing the height and the distance of the camera from the car*/

@@ -411,25 +411,25 @@ class A16 : public BaseProject {
 			}
 			break;
 		case 1:
+            freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
             globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
             globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             globalUniformBlockDay.ambLightColor = glm::vec3(0.1f);
             globalUniformBlockDay.eyePos = CamPos;
             DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
-            freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
             if (handleFire) {
                 gameState = 2;
                 RebuildPipeline();
             }
 			break;
 		case 2:
-            globalUniformBlockNight.lightPos = CarPos;
-            globalUniformBlockNight.lightDir = glm::vec3(sin(CarYaw), 0.0f, cos(CarYaw));
-            globalUniformBlockNight.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            globalUniformBlockNight.ambLightColor = glm::vec3(0.1f);
+            gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+            globalUniformBlockNight.lightPos = CarPos + glm::vec3(- sin(CarYaw) * 0.4f, 0.35f, - cos(CarYaw) * 0.4f);
+            globalUniformBlockNight.lightDir = glm::vec3(sin(CarYaw), 0.3f, cos(CarYaw));
+            globalUniformBlockNight.lightColor = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f);
+            globalUniformBlockNight.ambLightColor = glm::vec3(0.02f);
             globalUniformBlockNight.eyePos = CamPos;
             DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
-            gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
 			break;
 		}
 

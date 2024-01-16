@@ -69,7 +69,7 @@ void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
 
     /*Update the output variables (car position and car direction are fixed)*/
     CamPos = freeCamPos;
-    CarPos = glm::vec3(-38.0f, 0.0, 4.0f);
+    CarPos = carStartingPosition;
     CarYaw = glm::radians(0.0f);
 
     /*Create a World Matrix for the car*/
