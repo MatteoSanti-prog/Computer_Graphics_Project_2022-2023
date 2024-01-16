@@ -8,8 +8,8 @@
 /*FREE CAM VARIABLES*/
 /*Static variable used to store the current position and direction of the camera*/
 static glm::vec3 freeCamPos = freeCamStartingPosition;
-static float freeCamYaw = 0.0f;
-static float freeCamPitch = 0.0f;
+static float freeCamYaw = freeCamStartingYaw;
+static float freeCamPitch = freeCamStartingPitch;
 /*Static variables used to perform dumping*/
 static glm::vec3 freeCamPosOld = freeCamStartingPosition;
 static glm::vec3 freeCamPosNew = freeCamStartingPosition;
@@ -74,6 +74,10 @@ void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
 
     /*Create a World Matrix for the car*/
     WorldMatrix = glm::translate(glm::mat4(1.0), CarPos) * glm::rotate(glm::mat4(1.0), CarYaw, glm::vec3(0, 1, 0));
+    
+    std::cout << "freeCamPos: (" << freeCamPos.x << ',' << freeCamPos.y << ',' << freeCamPos.z << std::endl;
+    std::cout << "freeCamYaw: " << freeCamYaw << std::endl;
+    std::cout << "freeCamPitch: " << freeCamPitch << std::endl;
 }
 
 /*

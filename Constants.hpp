@@ -25,7 +25,9 @@ const float freeMaxPitch = glm::radians(90.0f);
 const float freeRotSpeed = glm::radians(90.0f);
 const float freeMovSpeed = 10.0f;
 
-const glm::vec3 freeCamStartingPosition = glm::vec3(0.0f, 2.0f, 7.0f);
+const glm::vec3 freeCamStartingPosition = glm::vec3(-59.359f, 11.6599f, 59.9026f);
+const float freeCamStartingYaw = -0.782541f;
+const float freeCamStartingPitch = -0.0851274f;
 
 //Controller - game logic
 /*Constants used for setting the initial position and the initial direction of the car*/
