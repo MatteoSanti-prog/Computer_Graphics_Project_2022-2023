@@ -22,9 +22,9 @@ bool validPosition(glm::vec3 pos) {
 	float border = 15.0f;
 
     Collider mapLimits { border, -border, border, -border, border};
-    Collider sectionGFHE { 7.0f, 5.0f, 7.0f, -1.0f, 2.0f};
-    Collider sectionRJQG { 4.0f, -4.0f, 0, -2.0f, 2.0f};
-    Collider sectionOPKN { -5.0f, -8.0f, 3.0f, -7.0f, 2.0f};
+    Collider sectionGFHE { 6.9f, 5.0f, 6.95f, -0.95f, 2.0f};
+    Collider sectionRJQG { 4.05f, -4.0f, 0, -1.9f, 2.0f};
+    Collider sectionOPKN { -5.0f, -8.1f, 3.0f, -6.9f, 2.0f};
 	if (sectionGFHE.isInside(pos))
 		return false;
 	if (sectionRJQG.isInside(pos))

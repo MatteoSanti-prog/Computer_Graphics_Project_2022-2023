@@ -44,19 +44,24 @@ const float glMaxPitch = glm::radians(30.0f);
 const float glRotSpeedPitch = glm::radians(20.0f);
 
 /*Constants used to bind translational speed and acceleration of the car*/
-const float carMinSpeedThreshold = 0.3f;
-const float carMaxMovSpeedForward = 15.0f;
-const float carMaxMovSpeedBackward = 6.0f;
+const float carMinSpeedThreshold = 0.6f;
+const float carMaxMovSpeedForward = 18.0f;
+const float carMaxMovSpeedBackward = 2.0f;
 const float carMovAccFactorForward = 2.5f;
-const float carMovAccFactorBackward = 2.0f;
+const float carMovAccFactorBackward = 4.5f;
 
 /*Constant used to implement the motor brake (during translational movement)*/
-const float carMotorBrakeFactor = 0.15f;
+const float carMotorBrakeFactor = 0.25f;
 
 /*Constant used to implement power steering (during rotational movement)*/
 const float carPowerSteeringFactor = 3.5f;
 
 /*Constants used to bind rotational speed and acceleration of the car*/
-const float carMaxRotSpeed = glm::radians(80.0f);
+const float carMaxRotHighSpeedForward = glm::radians(15.0f);
+const float carMaxRotLowSpeedForward = glm::radians(140.0f);
+const float carMaxRotHighSpeedBackward = glm::radians(10.0f);
+const float carMaxRotLowSpeedBackward = glm::radians(20.0f);
 const float carRotAccFactorForward = 3.5f;
 const float carRotAccFactorBackward = 1.0f;
+
+const float carRotEpsilon = glm::radians(1.5f);

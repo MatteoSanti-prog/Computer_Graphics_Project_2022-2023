@@ -100,6 +100,8 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
     /*Floating point variable used to store normalized translational speed*/
     float normMovSpeed;
 
+    float carMaxRotSpeed;
+
     /*3D vector used to store the point of the car followed by the camera*/
     glm::vec3 Target;
 
@@ -111,22 +113,11 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
     glCamPitch = glCamPitch < glMinPitch ? glMinPitch :
                  (glCamPitch > glMaxPitch ? glMaxPitch : glCamPitch);
 
-    /*STEERING OF THE CAR*/
-
-    /*Update the rotational accelerations (the update depends on the status of the key used for rotation)*/
-    rotDeceleration = r.y != 0 ? 0.0f : -glRotSpeed * carPowerSteeringFactor;
-    
-    /*Update the rotational acceleration and bind the rotational speed of the car (the update depends on the status of the key used for translation*/
-    motAcceleration = m.z > 0.0f ? carRotAccFactorForward : carRotAccFactorBackward;
-    
-    /*Update the rotational speed*/
-    glRotSpeed = glRotSpeed > carMaxRotSpeed ? carMaxRotSpeed :
-                 (glRotSpeed < -carMaxRotSpeed ? -carMaxRotSpeed : glRotSpeed + (r.y * motAcceleration + rotDeceleration) * deltaT);
 
     /*TRANSLATION OF THE CAR*/
 
     /*Update the normalized translational speed (the update depends on the sign of the translational speed of the car)*/
-    normMovSpeed = glMovSpeed >= 0 ? glMovSpeed / carMaxMovSpeedForward : glMovSpeed / carMaxMovSpeedBackward;
+    normMovSpeed = glMovSpeed >= 0 ? abs(glMovSpeed / carMaxMovSpeedForward) : abs(glMovSpeed / carMaxMovSpeedBackward);
 
     /*Update the translational accelerations (the update depends on the status of the key used for acceleration)*/
     movDeceleration = m.z != 0 ? 0.0f : -glMovSpeed * carMotorBrakeFactor;
@@ -141,9 +132,26 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
     glMovSpeed = glMovSpeed < carMinSpeedThreshold && glLastMovSpeed >= carMinSpeedThreshold ? 0.0f :
                  (glMovSpeed > -carMinSpeedThreshold && glLastMovSpeed <= -carMinSpeedThreshold ? 0.0f : glMovSpeed);
 
+
+    /*STEERING OF THE CAR*/
+
+    /*Update the rotational accelerations (the update depends on the status of the key used for rotation)*/
+    rotDeceleration = r.y != 0 ? 0.0f : -glRotSpeed * carPowerSteeringFactor;
+
+    /*Update the rotational acceleration and bind the rotational speed of the car (the update depends on the status of the key used for translation*/
+    motAcceleration = m.z > 0.0f ? carRotAccFactorForward : carRotAccFactorBackward;
+
+    /*Update the maximum rotation speed of the car on the basis of the translational speed*/
+    carMaxRotSpeed = glMovSpeed >= 0 ? carMaxRotHighSpeedForward * normMovSpeed + carMaxRotLowSpeedForward * (1 - normMovSpeed) :
+                     carMaxRotHighSpeedBackward * normMovSpeed + carMaxRotLowSpeedBackward * (1 - normMovSpeed);
+
+    /*Update the rotational speed*/
+    glRotSpeed = glRotSpeed > carMaxRotSpeed + carRotEpsilon ? carMaxRotSpeed :
+                 (glRotSpeed < -(carMaxRotSpeed + carRotEpsilon) ? -carMaxRotSpeed : glRotSpeed + (r.y * motAcceleration + rotDeceleration) * deltaT);
+
     /*Update the translational speed of the previous frame*/
     glLastMovSpeed = glMovSpeed;
-    
+
     /*Update the direction of the car using an interpolation method in order to have a more realistic movement*/
     glLocalCarYaw = glm::mix(glLocalCarYaw, glLocalCarYaw - glRotSpeed * deltaT, normMovSpeed);
 
@@ -197,6 +205,6 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
 void resetFreeCam(){
     freeCamPosOld = freeCamStartingPosition;
     freeCamPosNew = freeCamStartingPosition;
-    freeCamYaw = 0.0f;
-    freeCamPitch = 0.0f;
+    freeCamYaw = freeCamStartingYaw;
+    freeCamPitch = freeCamStartingPitch;
 }

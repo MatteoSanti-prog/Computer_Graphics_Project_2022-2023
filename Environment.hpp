@@ -5,10 +5,10 @@
 void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
 	
 	// Base
-	vPos.push_back({ {-250, 250, 0}, {0,0,1}, {0.58f,0.74f} }); //A
-	vPos.push_back({ {250, 250, 0}, {0,0,1}, {0.6f,0.74f} }); //B
-	vPos.push_back({ {-250, -250, 0}, {0,0,1}, {0.58f,0.76f} }); //C
-	vPos.push_back({ {250, -250, 0}, {0,0,1}, {0.6f,0.76f} }); //D
+	vPos.push_back({ {-15, 15, 0}, {0,0,1}, {0.58f,0.74f} }); //A
+	vPos.push_back({ {15, 15, 0}, {0,0,1}, {0.6f,0.74f} }); //B
+	vPos.push_back({ {-15, -15, 0}, {0,0,1}, {0.58f,0.76f} }); //C
+	vPos.push_back({ {15, -15, 0}, {0,0,1}, {0.6f,0.76f} }); //D
 
 	// Upper part
 	vPos.push_back({ {5,1,h}, {0,0,1}, {0.40f,0.24f} }); //G 
