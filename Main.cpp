@@ -24,7 +24,7 @@ class A16 : public BaseProject {
     DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
     DSCoin;
 
-	Texture TCity, TSplash, TCoin;
+	Texture TCity, TSplash, TCoin, TGrass;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
@@ -127,6 +127,7 @@ class A16 : public BaseProject {
 		TCity.init(this, "textures/Textures_City.png");
 		TSplash.init(this, "textures/initial_screen.png");
         TCoin.init(this, "textures/Textures_Coin.png");
+        TGrass.init(this, "textures/grass.png");
 
         gameState = 0;
 
@@ -194,9 +195,8 @@ class A16 : public BaseProject {
 
 		DSEnv.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TGrass}
 			});
-
 
         DSRoad.init(this, &DSLMesh, {
                     {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
@@ -255,6 +255,7 @@ class A16 : public BaseProject {
 		TCity.cleanup();
 		TSplash.cleanup();
         TCoin.cleanup();
+        TGrass.cleanup();
 
 		MCar.cleanup();
 		MApartment1.cleanup();
