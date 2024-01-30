@@ -24,7 +24,7 @@ class A16 : public BaseProject {
     DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
     DSCoin;
 
-	Texture TCity, TSplash, TCoin, TGrass;
+	Texture TCity, TSplash, TGrass;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
@@ -114,7 +114,7 @@ class A16 : public BaseProject {
 		MDwelling12.init(this, &VMesh, "Models/dwelling_012.mgcg", MGCG);
 		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
 		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
-        MCoin.init(this, &VMesh, "Models/coin.obj", OBJ);
+        //MCoin.init(this, &VMesh, "Models/coin.obj", OBJ);
 
 		MSplash.vertices = { {{-1.0f, -1.0f}, {0.001f, 0.001f}}, {{-1.0f, 1.0f}, {0.001f,0.999f}},
 						 {{ 1.0f,-1.0f}, {0.999f,0.001f}}, {{ 1.0f, 1.0f}, {0.999f,0.999f}} };
@@ -124,9 +124,11 @@ class A16 : public BaseProject {
 		createEnvironment(MEnv.vertices, MEnv.indices);
 		MEnv.initMesh(this, &VMesh);
 
+        createCoin(MCoin.vertices, MCoin.indices);
+        MCoin.initMesh(this, &VMesh);
+
 		TCity.init(this, "textures/Textures_City.png");
 		TSplash.init(this, "textures/initial_screen.png");
-        TCoin.init(this, "textures/Textures_Coin.png");
         TGrass.init(this, "textures/grass.png");
 
         gameState = 0;
@@ -205,7 +207,7 @@ class A16 : public BaseProject {
         
         DSCoin.init(this, &DSLMesh, {
                     {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCoin}
+                    {1, TEXTURE, 0, &TCity}
             });
 
 		DSSplash.init(this, &DSLOverlay, {
@@ -254,7 +256,6 @@ class A16 : public BaseProject {
 
 		TCity.cleanup();
 		TSplash.cleanup();
-        TCoin.cleanup();
         TGrass.cleanup();
 
 		MCar.cleanup();
@@ -542,7 +543,9 @@ class A16 : public BaseProject {
 
             /*Coin Asset*/
             CoinYaw -= coinRotSpeed * deltaT;
-            World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+            World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                    glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
+                    glm::scale(glm::mat4(1.0), glm::vec3(1.0f, 0.15f, 1.0f));
             uboCoin.amb = 1.0f; uboCoin.gamma = 180.0f; uboCoin.sColor = glm::vec3(1.0f);
             uboCoin.mvpMat = Prj * View * World;
             uboCoin.mMat = World;
@@ -550,7 +553,8 @@ class A16 : public BaseProject {
             DSCoin.map(currentImage, &uboCoin, sizeof(uboCoin), 0);
 
             /*Environment Asset*/
-            World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+            World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+                    glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
             uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
             uboEnv.mvpMat = Prj * View * World;
             uboEnv.mMat = World;

@@ -40,18 +40,18 @@ glm::vec3 Checkpoint::getPos(){
 //Checkpoints list - coordinates (x,y,z)
 
 
-Checkpoint c1 (glm::vec3(-8.5f, 0.25f, 5.5f), 0.5f);
-Checkpoint c2 (glm::vec3(-4.0f, 0.25f, 4.0f), 0.5f);
-Checkpoint c3 (glm::vec3(0.0f, 0.25f, 2.5f), 0.5f);
-Checkpoint c4 (glm::vec3(3.0f, 0.25f, 6.5f), 0.5f);
-Checkpoint c5 (glm::vec3(8.0f, 0.25f, 10.0f), 0.5f);
-Checkpoint c6 (glm::vec3(9.5f, 0.25f, 4.5f), 0.5f);
-Checkpoint c7 (glm::vec3(9.0f, 0.25f, -1.0f), 0.5f);
-Checkpoint c8 (glm::vec3(4.0f, 0.25f, -4.0f), 0.5f);
-Checkpoint c9 (glm::vec3(-3.5f, 0.25f, -8.2f), 0.5f);
-Checkpoint c10 (glm::vec3(-8.5, 0.25f, -9.5f), 0.5f);
-Checkpoint c11 (glm::vec3(-9.5f, 0.25f, -5.5f), 0.5f);
-Checkpoint c12 (glm::vec3(-9.5f, 0.25f, 1.0f), 0.5f);
+Checkpoint c1 (glm::vec3(-8.5f, 0.35f, 5.5f), 0.5f);
+Checkpoint c2 (glm::vec3(-4.0f, 0.35f, 4.0f), 0.5f);
+Checkpoint c3 (glm::vec3(0.0f, 0.35f, 2.5f), 0.5f);
+Checkpoint c4 (glm::vec3(3.0f, 0.35f, 6.5f), 0.5f);
+Checkpoint c5 (glm::vec3(8.0f, 0.35f, 10.0f), 0.5f);
+Checkpoint c6 (glm::vec3(9.5f, 0.35f, 4.5f), 0.5f);
+Checkpoint c7 (glm::vec3(9.0f, 0.35f, -1.0f), 0.5f);
+Checkpoint c8 (glm::vec3(4.0f, 0.35f, -4.0f), 0.5f);
+Checkpoint c9 (glm::vec3(-3.5f, 0.35f, -8.2f), 0.5f);
+Checkpoint c10 (glm::vec3(-8.5, 0.35f, -9.5f), 0.5f);
+Checkpoint c11 (glm::vec3(-9.5f, 0.35f, -5.5f), 0.5f);
+Checkpoint c12 (glm::vec3(-9.5f, 0.35f, 1.0f), 0.5f);
 
 //Checkpoint cTest1 (glm::vec3(0.0f, 0.0f, 2.5f), 0.5f);
 //Checkpoint cTest2 (glm::vec3(3.0f, 0.0f, 6.5f), 0.5f);
