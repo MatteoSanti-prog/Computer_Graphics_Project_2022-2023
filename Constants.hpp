@@ -51,7 +51,7 @@ const float carMovAccFactorForward = 2.5f;
 const float carMovAccFactorBackward = 4.5f;
 
 /*Constant used to implement the motor brake (during translational movement)*/
-const float carMotorBrakeFactor = 0.25f;
+const float carMotorBrakeFactor = 0.10f;
 
 /*Constant used to implement power steering (during rotational movement)*/
 const float carPowerSteeringFactor = 3.5f;

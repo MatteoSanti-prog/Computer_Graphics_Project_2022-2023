@@ -3,11 +3,13 @@
 struct MeshUniformBlock {
     alignas(4) float amb;
     alignas(4) float gamma;
+    alignas(4) float metallic;
     alignas(16) glm::vec3 sColor;
     alignas(16) glm::mat4 mvpMat;
     alignas(16) glm::mat4 mMat;
     alignas(16) glm::mat4 nMat;
 };
+
 
 struct GlobalUniformBlockNight {
     alignas(16) glm::vec3 lightPos;

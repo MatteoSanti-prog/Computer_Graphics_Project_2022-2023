@@ -40,7 +40,7 @@ class A16 : public BaseProject {
 		windowHeight = 600;
 		windowTitle = "A16";
 		windowResizable = GLFW_TRUE;
-		initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
+		initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
 		uniformBlocksInPool = 19;
 		texturesInPool = 17;
@@ -114,7 +114,6 @@ class A16 : public BaseProject {
 		MDwelling12.init(this, &VMesh, "Models/dwelling_012.mgcg", MGCG);
 		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
 		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
-        //MCoin.init(this, &VMesh, "Models/coin.obj", OBJ);
 
 		MSplash.vertices = { {{-1.0f, -1.0f}, {0.001f, 0.001f}}, {{-1.0f, 1.0f}, {0.001f,0.999f}},
 						 {{ 1.0f,-1.0f}, {0.999f,0.001f}}, {{ 1.0f, 1.0f}, {0.999f,0.999f}} };
@@ -409,6 +408,7 @@ class A16 : public BaseProject {
 		case 0:
 			if (handleFire) {
                 gameState = 1;
+                initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
                 RebuildPipeline();
 			}
 			break;
@@ -416,11 +416,12 @@ class A16 : public BaseProject {
             freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
             globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
             globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            globalUniformBlockDay.ambLightColor = glm::vec3(0.1f);
+            globalUniformBlockDay.ambLightColor = glm::vec3(0.3f);
             globalUniformBlockDay.eyePos = CamPos;
             DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
             if (handleFire) {
                 gameState = 2;
+                initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
                 RebuildPipeline();
             }
 			break;
@@ -440,7 +441,8 @@ class A16 : public BaseProject {
 
         if(gameState != 0){
 
-            uboCar.amb = 1.0f; uboCar.gamma = 180.0f; uboCar.sColor = glm::vec3(1.0f);
+            uboCar.amb = 1.0f; uboCar.gamma = 360.0f;
+            uboCar.sColor = glm::vec3(1.0f); uboCar.metallic = 1.0f;
             uboCar.mvpMat = Prj * View * World;
             uboCar.mMat = World;
             uboCar.nMat = glm::inverse(glm::transpose(World));
@@ -448,35 +450,40 @@ class A16 : public BaseProject {
 
             /*Assets in the GFHE section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment1.amb = 1.0f; uboApartment1.gamma = 180.0f; uboApartment1.sColor = glm::vec3(1.0f);
+            uboApartment1.amb = 1.0f; uboApartment1.gamma = 180.0f;
+            uboApartment1.sColor = glm::vec3(1.0f); uboApartment1.metallic = 0.3f;
             uboApartment1.mvpMat = Prj * View * World;
             uboApartment1.mMat = World;
             uboApartment1.nMat = glm::inverse(glm::transpose(World));
             DSApartment1.map(currentImage, &uboApartment1, sizeof(uboApartment1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 6.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.sColor = glm::vec3(1.0f);
+            uboDwellingStore1.amb = 1.0f; uboDwellingStore1.gamma = 180.0f;
+            uboDwellingStore1.sColor = glm::vec3(1.0f); uboDwellingStore1.metallic = 0.3f;
             uboDwellingStore1.mvpMat = Prj * View * World;
             uboDwellingStore1.mMat = World;
             uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 11.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.sColor = glm::vec3(1.0f);
+            uboDwellingStore8.amb = 1.0f; uboDwellingStore8.gamma = 180.0f;
+            uboDwellingStore8.sColor = glm::vec3(1.0f); uboDwellingStore8.metallic = 0.3f;
             uboDwellingStore8.mvpMat = Prj * View * World;
             uboDwellingStore8.mMat = World;
             uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 25.5f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore2.amb = 1.0f; uboDwellingStore2.gamma = 180.0f; uboDwellingStore2.sColor = glm::vec3(1.0f);
+            uboDwellingStore2.amb = 1.0f; uboDwellingStore2.gamma = 180.0f;
+            uboDwellingStore2.sColor = glm::vec3(1.0f); uboDwellingStore2.metallic = 0.3f;
             uboDwellingStore2.mvpMat = Prj * View * World;
             uboDwellingStore2.mMat = World;
             uboDwellingStore2.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore2.map(currentImage, &uboDwellingStore2, sizeof(uboDwellingStore2), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 18.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f; uboDwelling12.sColor = glm::vec3(1.0f);
+            uboDwelling12.amb = 1.0f; uboDwelling12.gamma = 180.0f;
+            uboDwelling12.sColor = glm::vec3(1.0f); uboDwelling12.metallic = 0.3f;
             uboDwelling12.mvpMat = Prj * View * World;
             uboDwelling12.mMat = World;
             uboDwelling12.nMat = glm::inverse(glm::transpose(World));
@@ -484,28 +491,32 @@ class A16 : public BaseProject {
 
             /*Assets in the RJQG section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(12.5f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment3.amb = 1.0f; uboApartment3.gamma = 180.0f; uboApartment3.sColor = glm::vec3(1.0f);
+            uboApartment3.amb = 1.0f; uboApartment3.gamma = 180.0f;
+            uboApartment3.sColor = glm::vec3(1.0f); uboApartment3.metallic = 0.3f;
             uboApartment3.mvpMat = Prj * View * World;
             uboApartment3.mMat = World;
             uboApartment3.nMat = glm::inverse(glm::transpose(World));
             DSApartment3.map(currentImage, &uboApartment3, sizeof(uboApartment3), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(5.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment2.amb = 1.0f; uboApartment2.gamma = 180.0f; uboApartment2.sColor = glm::vec3(1.0f);
+            uboApartment2.amb = 1.0f; uboApartment2.gamma = 180.0f;
+            uboApartment2.sColor = glm::vec3(1.0f); uboApartment2.metallic = 0.3f;
             uboApartment2.mvpMat = Prj * View * World;
             uboApartment2.mMat = World;
             uboApartment2.nMat = glm::inverse(glm::transpose(World));
             DSApartment2.map(currentImage, &uboApartment2, sizeof(uboApartment2), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-2.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboBank1.amb = 1.0f; uboBank1.gamma = 180.0f; uboBank1.sColor = glm::vec3(1.0f);
+            uboBank1.amb = 1.0f; uboBank1.gamma = 180.0f;
+            uboBank1.sColor = glm::vec3(1.0f); uboBank1.metallic = 0.3f;
             uboBank1.mvpMat = Prj * View * World;
             uboBank1.mMat = World;
             uboBank1.nMat = glm::inverse(glm::transpose(World));
             DSBank1.map(currentImage, &uboBank1, sizeof(uboBank1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling13.amb = 1.0f; uboDwelling13.gamma = 180.0f; uboDwelling13.sColor = glm::vec3(1.0f);
+            uboDwelling13.amb = 1.0f; uboDwelling13.gamma = 180.0f;
+            uboDwelling13.sColor = glm::vec3(1.0f); uboDwelling13.metallic = 0.3f;
             uboDwelling13.mvpMat = Prj * View * World;
             uboDwelling13.mMat = World;
             uboDwelling13.nMat = glm::inverse(glm::transpose(World));
@@ -513,21 +524,24 @@ class A16 : public BaseProject {
 
             /*Assets in the OPKN section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f; uboEntertainment6.sColor = glm::vec3(1.0f);
+            uboEntertainment6.amb = 1.0f; uboEntertainment6.gamma = 180.0f;
+            uboEntertainment6.sColor = glm::vec3(1.0f); uboEntertainment6.metallic = 0.3f;
             uboEntertainment6.mvpMat = Prj * View * World;
             uboEntertainment6.mMat = World;
             uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
             DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f));
-            uboApartment4.amb = 1.0f; uboApartment4.gamma = 180.0f; uboApartment4.sColor = glm::vec3(1.0f);
+            uboApartment4.amb = 1.0f; uboApartment4.gamma = 180.0f;
+            uboApartment4.sColor = glm::vec3(1.0f); uboApartment4.metallic = 0.3f;
             uboApartment4.mvpMat = Prj * View * World;
             uboApartment4.mMat = World;
             uboApartment4.nMat = glm::inverse(glm::transpose(World));
             DSApartment4.map(currentImage, &uboApartment4, sizeof(uboApartment4), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f; uboDwelling1.sColor = glm::vec3(1.0f);
+            uboDwelling1.amb = 1.0f; uboDwelling1.gamma = 180.0f;
+            uboDwelling1.sColor = glm::vec3(1.0f); uboDwelling1.metallic = 0.3f;
             uboDwelling1.mvpMat = Prj * View * World;
             uboDwelling1.mMat = World;
             uboDwelling1.nMat = glm::inverse(glm::transpose(World));
@@ -535,7 +549,8 @@ class A16 : public BaseProject {
 
             /*Road Asset*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-            uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f; uboRoad.sColor = glm::vec3(1.0f);
+            uboRoad.amb = 1.0f; uboRoad.gamma = 180.0f;
+            uboRoad.sColor = glm::vec3(1.0f); uboRoad.metallic = 0.3f;
             uboRoad.mvpMat = Prj * View * World;
             uboRoad.mMat = World;
             uboRoad.nMat = glm::inverse(glm::transpose(World));
@@ -546,7 +561,8 @@ class A16 : public BaseProject {
             World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
                     glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
                     glm::scale(glm::mat4(1.0), glm::vec3(1.0f, 0.15f, 1.0f));
-            uboCoin.amb = 1.0f; uboCoin.gamma = 180.0f; uboCoin.sColor = glm::vec3(1.0f);
+            uboCoin.amb = 1.0f; uboCoin.gamma = 360.0f;
+            uboCoin.sColor = glm::vec3(1.0f); uboCoin.metallic = 1.0f;
             uboCoin.mvpMat = Prj * View * World;
             uboCoin.mMat = World;
             uboCoin.nMat = glm::inverse(glm::transpose(World));
@@ -555,7 +571,8 @@ class A16 : public BaseProject {
             /*Environment Asset*/
             World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
                     glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-            uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f; uboEnv.sColor = glm::vec3(1.0f);
+            uboEnv.amb = 1.0f; uboEnv.gamma = 180.0f;
+            uboEnv.sColor = glm::vec3(1.0f); uboEnv.metallic = 0.0f;
             uboEnv.mvpMat = Prj * View * World;
             uboEnv.mMat = World;
             uboEnv.nMat = glm::inverse(glm::transpose(World));
