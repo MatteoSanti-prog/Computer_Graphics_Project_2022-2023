@@ -1,10 +1,8 @@
 #pragma once
 
 struct MeshUniformBlock {
-    alignas(4) float amb;
     alignas(4) float gamma;
     alignas(4) float metallic;
-    alignas(16) glm::vec3 sColor;
     alignas(16) glm::mat4 mvpMat;
     alignas(16) glm::mat4 mMat;
     alignas(16) glm::mat4 nMat;
@@ -14,15 +12,13 @@ struct MeshUniformBlock {
 struct GlobalUniformBlockNight {
     alignas(16) glm::vec3 lightPos;
     alignas(16) glm::vec3 lightDir;
-    alignas(16) glm::vec3 lightColor;
-    alignas(16) glm::vec3 ambLightColor;
+    alignas(16) glm::vec3 lightColorBrakes;
     alignas(16) glm::vec3 eyePos;
 };
 
 struct GlobalUniformBlockDay {
     alignas(16) glm::vec3 lightDir;
     alignas(16) glm::vec3 lightColor;
-    alignas(16) glm::vec3 ambLightColor;
     alignas(16) glm::vec3 eyePos;
 };
 

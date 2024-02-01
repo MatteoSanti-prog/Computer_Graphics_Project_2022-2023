@@ -17,7 +17,7 @@ class Checkpoint {
     
         Checkpoint();
         Checkpoint(glm::vec3 pos, float radius);
-        bool isHitted(glm::vec3 CarPos);
+        bool isHit(glm::vec3 CarPos);
         bool isVisible();
         void changeVisibility();
         glm::vec3 getPos();
