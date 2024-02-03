@@ -4,216 +4,222 @@
 #include "Environment.hpp"
 #include "Structs.hpp"
 #include "Checkpoint.hpp"
+#include <chrono> //timer
 
-class A16 : public BaseProject {
-	protected:
 
-	float Ar;
+class GoldenRoad : public BaseProject {
+protected:
 
-	DescriptorSetLayout DSLDay, DSLNight, DSLMesh, DSLOverlay;
+    float Ar;
 
-	VertexDescriptor VMesh, VOverlay;
+    //timer variables
+    float timer = 0;
+    int tic = 0;
 
-	Pipeline PMeshDay, PMeshNight, POverlay;
+    DescriptorSetLayout DSLDay, DSLNight, DSLMesh, DSLOverlay;
 
-	Model<VertexMesh> MCar, MApartment1, MApartment2, MApartment3, MBank1, MDwellingStore1, MDwellingStore2, MDwellingStore8,
-    MDwelling1, MDwelling12, MEntertainment6, MEnv, MRoad, MCoin;
-	Model<VertexOverlay> MSplash;
+    VertexDescriptor VMesh, VOverlay;
 
-	DescriptorSet DSDay, DSNight, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1,
-    DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
-    DSCoin;
+    Pipeline PMeshDay, PMeshNight, POverlay;
 
-	Texture TCity, TSplash, TGrass;
+    Model<VertexMesh> MCar, MApartment1, MApartment2, MApartment3, MBank1, MDwellingStore1, MDwellingStore2, MDwellingStore8,
+            MDwelling1, MDwelling12, MEntertainment6, MEnv, MRoad, MCoin;
+    Model<VertexOverlay> MSplash;
 
-	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
-	OverlayUniformBlock uboSplash;
+    DescriptorSet DSDay, DSNight, DSCar, DSApartment1, DSApartment2, DSApartment3, DSApartment4, DSBank1, DSDwellingStore1,
+            DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
+            DSCoin;
 
-	GlobalUniformBlockNight globalUniformBlockNight;
+    Texture TCity, TSplash, TGrass;
+
+    MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
+    OverlayUniformBlock uboSplash;
+
+    GlobalUniformBlockNight globalUniformBlockNight;
     GlobalUniformBlockDay globalUniformBlockDay;
 
-	int gameState;
+    int gameState;
     int brakeOnOff;
 
-	void setWindowParameters() {
+    void setWindowParameters() {
 
-		windowWidth = 800;
-		windowHeight = 600;
-		windowTitle = "ProjectCG";
-		windowResizable = GLFW_TRUE;
-		initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
+        windowWidth = 800;
+        windowHeight = 600;
+        windowTitle = "GoldenRoad";
+        windowResizable = GLFW_TRUE;
+        initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
-		uniformBlocksInPool = 19;
-		texturesInPool = 17;
+        uniformBlocksInPool = 19;
+        texturesInPool = 17;
 
-		setsInPool = 19;
+        setsInPool = 19;
 
-		Ar = (float)windowWidth / (float)windowHeight;
-	}
+        Ar = (float)windowWidth / (float)windowHeight;
+    }
 
-	void onWindowResize(int w, int h) {
-		Ar = (float)w / (float)h;
-	}
+    void onWindowResize(int w, int h) {
+        Ar = (float)w / (float)h;
+    }
 
-	void localInit() {
+    void localInit() {
 
-		DSLMesh.init(this, {
-			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-			        {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-			});
+        DSLMesh.init(this, {
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+        });
 
-		DSLOverlay.init(this, {
-			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-					{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-			});
+        DSLOverlay.init(this, {
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+        });
 
         DSLDay.init(this, {
                 {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
         });
 
-		DSLNight.init(this, {
-					{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
-			});
+        DSLNight.init(this, {
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+        });
 
 
-		VMesh.init(this, {
-			{0, sizeof(VertexMesh), VK_VERTEX_INPUT_RATE_VERTEX}
-			}, {
-				{0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexMesh, pos),
-					   sizeof(glm::vec3), POSITION},
-				{0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexMesh, norm),
-					   sizeof(glm::vec3), NORMAL},
-				{0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
-					   sizeof(glm::vec2), UV}
-			});
+        VMesh.init(this, {
+                {0, sizeof(VertexMesh), VK_VERTEX_INPUT_RATE_VERTEX}
+        }, {
+                           {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexMesh, pos),
+                                   sizeof(glm::vec3), POSITION},
+                           {0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexMesh, norm),
+                                   sizeof(glm::vec3), NORMAL},
+                           {0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
+                                   sizeof(glm::vec2), UV}
+                   });
 
-		VOverlay.init(this, {
-	        {0, sizeof(VertexOverlay), VK_VERTEX_INPUT_RATE_VERTEX}
-			}, {
-				{0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, pos),
-					   sizeof(glm::vec2), OTHER},
-				{0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, UV),
-					   sizeof(glm::vec2), UV}
-			});
+        VOverlay.init(this, {
+                {0, sizeof(VertexOverlay), VK_VERTEX_INPUT_RATE_VERTEX}
+        }, {
+                              {0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, pos),
+                                      sizeof(glm::vec2), OTHER},
+                              {0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexOverlay, UV),
+                                      sizeof(glm::vec2), UV}
+                      });
 
 
-		PMeshDay.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFragDay.spv", {&DSLDay, &DSLMesh });
+        PMeshDay.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFragDay.spv", {&DSLDay, &DSLMesh });
         PMeshNight.init(this, &VMesh, "shaders/MeshVert.spv", "shaders/MeshFragNight.spv", {&DSLNight, &DSLMesh });
-		POverlay.init(this, &VOverlay, "shaders/OverlayVert.spv", "shaders/OverlayFrag.spv", { &DSLOverlay });
-		POverlay.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
-			VK_CULL_MODE_NONE, false);
-        
-		MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
-		MApartment1.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
-		MApartment2.init(this, &VMesh, "Models/apartment_002.mgcg", MGCG);
-		MApartment3.init(this, &VMesh, "Models/apartment_003.mgcg", MGCG);
-		MBank1.init(this, &VMesh, "Models/bank_001.mgcg", MGCG);
-		MDwellingStore1.init(this, &VMesh, "Models/dwelling&store_001.mgcg", MGCG);
-		MDwellingStore2.init(this, &VMesh, "Models/dwelling&store_002.mgcg", MGCG);
-		MDwellingStore8.init(this, &VMesh, "Models/dwelling&store_008.mgcg", MGCG);
-		MDwelling1.init(this, &VMesh, "Models/dwelling_001.mgcg", MGCG);
-		MDwelling12.init(this, &VMesh, "Models/dwelling_012.mgcg", MGCG);
-		MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
-		MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
+        POverlay.init(this, &VOverlay, "shaders/OverlayVert.spv", "shaders/OverlayFrag.spv", { &DSLOverlay });
+        POverlay.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
+                                     VK_CULL_MODE_NONE, false);
 
-		MSplash.vertices = { {{-1.0f, -1.0f}, {0.001f, 0.001f}}, {{-1.0f, 1.0f}, {0.001f,0.999f}},
-						 {{ 1.0f,-1.0f}, {0.999f,0.001f}}, {{ 1.0f, 1.0f}, {0.999f,0.999f}} };
-		MSplash.indices = { 0, 1, 2,    1, 2, 3 };
-		MSplash.initMesh(this, &VOverlay);
+        MCar.init(this, &VMesh, "Models/transport_cool_009_transport_cool_009.001.mgcg", MGCG);
+        MApartment1.init(this, &VMesh, "Models/apartment_001.mgcg", MGCG);
+        MApartment2.init(this, &VMesh, "Models/apartment_002.mgcg", MGCG);
+        MApartment3.init(this, &VMesh, "Models/apartment_003.mgcg", MGCG);
+        MBank1.init(this, &VMesh, "Models/bank_001.mgcg", MGCG);
+        MDwellingStore1.init(this, &VMesh, "Models/dwelling&store_001.mgcg", MGCG);
+        MDwellingStore2.init(this, &VMesh, "Models/dwelling&store_002.mgcg", MGCG);
+        MDwellingStore8.init(this, &VMesh, "Models/dwelling&store_008.mgcg", MGCG);
+        MDwelling1.init(this, &VMesh, "Models/dwelling_001.mgcg", MGCG);
+        MDwelling12.init(this, &VMesh, "Models/dwelling_012.mgcg", MGCG);
+        MEntertainment6.init(this, &VMesh, "Models/landscape_entertainments_006.mgcg", MGCG);
+        MRoad.init(this, &VMesh, "Models/road.obj", OBJ);
 
-		createEnvironment(MEnv.vertices, MEnv.indices);
-		MEnv.initMesh(this, &VMesh);
+        MSplash.vertices = { {{-1.0f, -1.0f}, {0.001f, 0.001f}}, {{-1.0f, 1.0f}, {0.001f,0.999f}},
+                             {{ 1.0f,-1.0f}, {0.999f,0.001f}}, {{ 1.0f, 1.0f}, {0.999f,0.999f}} };
+        MSplash.indices = { 0, 1, 2,    1, 2, 3 };
+        MSplash.initMesh(this, &VOverlay);
+
+        createEnvironment(MEnv.vertices, MEnv.indices);
+        MEnv.initMesh(this, &VMesh);
 
         createCoin(MCoin.vertices, MCoin.indices);
         MCoin.initMesh(this, &VMesh);
 
-		TCity.init(this, "textures/Textures_City.png");
-		TSplash.init(this, "textures/initial_screen.png");
+        TCity.init(this, "textures/Textures_City.png");
+        TSplash.init(this, "textures/initial_screen.png");
         TGrass.init(this, "textures/grass.png");
 
-        gameState = 0;
+        gameState = SCREEN;
 
         initializeCheckpoints();
-	}
+    }
 
-	void pipelinesAndDescriptorSetsInit() {
+    void pipelinesAndDescriptorSetsInit() {
 
-		PMeshDay.create();
+        PMeshDay.create();
         PMeshNight.create();
-		POverlay.create();
+        POverlay.create();
 
-		DSCar.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSApartment1.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSApartment2.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSApartment3.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSApartment4.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSBank1.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwellingStore1.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwellingStore2.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwellingStore8.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwelling1.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwelling12.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSDwelling13.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
-		DSEntertainment6.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
-			});
+        DSCar.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSApartment1.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSApartment2.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSApartment3.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSApartment4.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSBank1.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwellingStore1.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwellingStore2.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwellingStore8.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwelling1.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwelling12.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSDwelling13.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+        DSEntertainment6.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
 
-		DSEnv.init(this, &DSLMesh, {
-					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TGrass}
-			});
+        DSEnv.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TGrass}
+        });
 
         DSRoad.init(this, &DSLMesh, {
-                    {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCity}
-            });
-        
-        DSCoin.init(this, &DSLMesh, {
-                    {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCity}
-            });
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
 
-		DSSplash.init(this, &DSLOverlay, {
-					{0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TSplash}
-		    });
+        DSCoin.init(this, &DSLMesh, {
+                {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TCity}
+        });
+
+        DSSplash.init(this, &DSLOverlay, {
+                {0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
+                {1, TEXTURE, 0, &TSplash}
+        });
 
         DSDay.init(this, &DSLDay, {
                 {0, UNIFORM, sizeof(GlobalUniformBlockDay), nullptr}
@@ -222,67 +228,67 @@ class A16 : public BaseProject {
         DSNight.init(this, &DSLNight, {
                 {0, UNIFORM, sizeof(GlobalUniformBlockNight), nullptr}
         });
-	}
+    }
 
 
-	void pipelinesAndDescriptorSetsCleanup() {
+    void pipelinesAndDescriptorSetsCleanup() {
 
-		PMeshDay.cleanup();
+        PMeshDay.cleanup();
         PMeshNight.cleanup();
-		POverlay.cleanup();
+        POverlay.cleanup();
 
-		DSCar.cleanup();
-		DSApartment1.cleanup();
-		DSApartment2.cleanup();
-		DSApartment3.cleanup();
-		DSApartment4.cleanup();
-		DSBank1.cleanup();
-		DSDwellingStore1.cleanup();
-		DSDwellingStore2.cleanup();
-		DSDwellingStore8.cleanup();
-		DSDwelling1.cleanup();
-		DSDwelling12.cleanup();
-		DSDwelling13.cleanup();
-		DSEntertainment6.cleanup();
-		DSRoad.cleanup();
+        DSCar.cleanup();
+        DSApartment1.cleanup();
+        DSApartment2.cleanup();
+        DSApartment3.cleanup();
+        DSApartment4.cleanup();
+        DSBank1.cleanup();
+        DSDwellingStore1.cleanup();
+        DSDwellingStore2.cleanup();
+        DSDwellingStore8.cleanup();
+        DSDwelling1.cleanup();
+        DSDwelling12.cleanup();
+        DSDwelling13.cleanup();
+        DSEntertainment6.cleanup();
+        DSRoad.cleanup();
         DSCoin.cleanup();
-		DSEnv.cleanup();
-		DSSplash.cleanup();
-		DSDay.cleanup();
+        DSEnv.cleanup();
+        DSSplash.cleanup();
+        DSDay.cleanup();
         DSNight.cleanup();
-	}
+    }
 
-	void localCleanup() {
+    void localCleanup() {
 
-		TCity.cleanup();
-		TSplash.cleanup();
+        TCity.cleanup();
+        TSplash.cleanup();
         TGrass.cleanup();
 
-		MCar.cleanup();
-		MApartment1.cleanup();
-		MApartment2.cleanup();
-		MApartment3.cleanup();
-		MBank1.cleanup();
-		MDwellingStore1.cleanup();
-		MDwellingStore2.cleanup();
-		MDwellingStore8.cleanup();
-		MDwelling1.cleanup();
-		MDwelling12.cleanup();
-		MEntertainment6.cleanup();
-		MRoad.cleanup();
+        MCar.cleanup();
+        MApartment1.cleanup();
+        MApartment2.cleanup();
+        MApartment3.cleanup();
+        MBank1.cleanup();
+        MDwellingStore1.cleanup();
+        MDwellingStore2.cleanup();
+        MDwellingStore8.cleanup();
+        MDwelling1.cleanup();
+        MDwelling12.cleanup();
+        MEntertainment6.cleanup();
+        MRoad.cleanup();
         MCoin.cleanup();
-		MEnv.cleanup();
-		MSplash.cleanup();
+        MEnv.cleanup();
+        MSplash.cleanup();
 
-		DSLMesh.cleanup();
-		DSLOverlay.cleanup();
+        DSLMesh.cleanup();
+        DSLOverlay.cleanup();
         DSLDay.cleanup();
-		DSLNight.cleanup();
+        DSLNight.cleanup();
 
-		PMeshDay.destroy();
+        PMeshDay.destroy();
         PMeshNight.destroy();
-		POverlay.destroy();
-	}
+        POverlay.destroy();
+    }
 
     void switchPipeline(VkCommandBuffer commandBuffer, int currentImage, Pipeline currPipeline, DescriptorSet currDs) {
 
@@ -368,7 +374,7 @@ class A16 : public BaseProject {
                          static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
     }
 
-	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
+    void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
         POverlay.bind(commandBuffer);
         MSplash.bind(commandBuffer);
@@ -377,69 +383,78 @@ class A16 : public BaseProject {
                          static_cast<uint32_t>(MSplash.indices.size()), 1, 0, 0, 0);
 
         /*Depending on the state of the game we choose which pipeline to use*/
-        if (gameState == 1) {
+        if (gameState == FREE_CAMERA) {
             switchPipeline(commandBuffer, currentImage, PMeshDay, DSDay);
         }
-        if (gameState == 2) {
+        if (gameState == GAME) {
             switchPipeline(commandBuffer, currentImage, PMeshNight, DSNight);
         }
-	}
+    }
 
-	void updateUniformBuffer(uint32_t currentImage) {
-		bool fire = false;
-		float deltaT;
-		glm::vec3 m = glm::vec3(0.0f), r = glm::vec3(0.0f);
-		glm::vec3 CarPos, CamPos;
-		float CarYaw;
+    void updateUniformBuffer(uint32_t currentImage) {
+        bool fire = false;
+        float deltaT;
+        glm::vec3 m = glm::vec3(0.0f), r = glm::vec3(0.0f);
+        glm::vec3 CarPos, CamPos;
+        float CarYaw;
         static float CoinYaw = glm::radians(0.0f);
-		glm::mat4 World, View, Prj;
+        glm::mat4 World, View, Prj;
+        // timer: delta time single frame
+        auto delta = std::chrono::system_clock::now();
 
 
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+            glfwSetWindowShouldClose(window, GL_TRUE);
+        }
 
-		getSixAxis(deltaT, m, r, fire);
+        getSixAxis(deltaT, m, r, fire);
 
-		static bool wasFire = false;
-		bool handleFire = (wasFire && (!fire));
-		wasFire = fire;
+        static bool wasFire = false;
+        bool handleFire = (wasFire && (!fire));
+        wasFire = fire;
 
-		switch (gameState) {
-		case 0:
-			if (handleFire) {
-                gameState = 1;
-                initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
-                RebuildPipeline();
-			}
-			break;
-		case 1:
-            freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-            globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
-            globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            globalUniformBlockDay.eyePos = CamPos;
-            DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
-            if (handleFire) {
-                gameState = 2;
-                initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
-                RebuildPipeline();
-            }
-			break;
-		case 2:
-            gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos, brakeOnOff);
-            globalUniformBlockNight.lightPos = CarPos + glm::vec3(- sin(CarYaw) * 0.4f, 0.6f, - cos(CarYaw) * 0.4f);
-            globalUniformBlockNight.lightDir = glm::vec3(sin(CarYaw), 0.3f, cos(CarYaw));
-            globalUniformBlockNight.lightColorBrakes = brakeOnOff == 0 ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) :
-                                                       (brakeOnOff == 1) ? glm::vec4(1.0f) : glm::vec4(0.0f);
-            globalUniformBlockNight.eyePos = CamPos;
-            DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
-			break;
-		}
+        switch (gameState) {
+            case SCREEN:
+                if (handleFire) {
+                    gameState = FREE_CAMERA;
+                    initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
+                    RebuildPipeline();
+                }
+                break;
+            case FREE_CAMERA:
+                freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
+                globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
+                globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                globalUniformBlockDay.eyePos = CamPos;
+                DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
+                if (handleFire) {
+                    gameState = GAME;
+                    initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
+                    RebuildPipeline();
+                }
+                break;
+            case GAME:
+                //update timer
+                timer += std::chrono::duration_cast<std::chrono::duration<float>>(delta.time_since_epoch()).count() *std::pow(10, -11);
+                tic++;
+                if(tic%100 == 0)
+                    std::cout << "timer: " << timer << std::endl;
+
+                gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos, brakeOnOff);
+
+                globalUniformBlockNight.lightPos = CarPos + glm::vec3(- sin(CarYaw) * 0.4f, 0.6f, - cos(CarYaw) * 0.4f);
+                globalUniformBlockNight.lightDir = glm::vec3(sin(CarYaw), 0.3f, cos(CarYaw));
+                globalUniformBlockNight.lightColorBrakes = brakeOnOff == 0 ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) :
+                                                           (brakeOnOff == 1) ? glm::vec4(1.0f) : glm::vec4(0.0f);
+                globalUniformBlockNight.eyePos = CamPos;
+                DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
+                break;
+        }
 
         Prj = glm::perspective(fovy, Ar, nearPlane, farPlane);
         Prj[1][1] *= -1;
 
-        if(gameState != 0){
+        if(gameState != SCREEN){
 
             uboCar.gamma = 360.0f; uboCar.metallic = 1.0f;
             uboCar.mvpMat = Prj * View * World;
@@ -563,22 +578,23 @@ class A16 : public BaseProject {
             DSEnv.map(currentImage, &uboEnv, sizeof(uboEnv), 0);
         }
 
-		uboSplash.visible = (gameState == 0) ? 1.0f : 0.0f;
-		DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
-	}
+        uboSplash.visible = (gameState == SCREEN) ? 1.0f : 0.0f;
+        DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
+    }
 };
 
 
+
 int main() {
-	A16 app;
+    GoldenRoad app;
 
-	try {
-		app.run();
-	}
-	catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
-	}
+    try {
+        app.run();
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
