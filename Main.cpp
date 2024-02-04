@@ -24,7 +24,7 @@ class A16 : public BaseProject {
     DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
     DSCoin;
 
-	Texture TCity, TSplash, TGrass;
+	Texture TCity, TSplash, TGrass, TMetalR, TMetalN, TMarbleR, TMarbleN;
 
 	MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
 	OverlayUniformBlock uboSplash;
@@ -44,7 +44,7 @@ class A16 : public BaseProject {
 		initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
 		uniformBlocksInPool = 19;
-		texturesInPool = 17;
+		texturesInPool = 55; //17
 
 		setsInPool = 19;
 
@@ -59,7 +59,9 @@ class A16 : public BaseProject {
 
 		DSLMesh.init(this, {
 			        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-			        {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+			        {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT},
+                    {2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT},
+                    {3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
 
 		DSLOverlay.init(this, {
@@ -83,8 +85,8 @@ class A16 : public BaseProject {
 					   sizeof(glm::vec3), POSITION},
 				{0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexMesh, norm),
 					   sizeof(glm::vec3), NORMAL},
-				{0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
-					   sizeof(glm::vec2), UV}
+                {0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexMesh, UV),
+                        sizeof(glm::vec2), UV}
 			});
 
 		VOverlay.init(this, {
@@ -130,6 +132,10 @@ class A16 : public BaseProject {
 		TCity.init(this, "textures/Textures_City.png");
 		TSplash.init(this, "textures/initial_screen.png");
         TGrass.init(this, "textures/grass.png");
+        TMetalR.init(this, "textures/Metals_10_met_rough_ao.png");
+        TMetalN.init(this, "textures/Metals_10_normal.png");
+        TMarbleR.init(this, "textures/Marble_08_met_rough_ao.png");
+        TMarbleN.init(this, "textures/Marble_08_normal.png");
 
         gameState = 0;
 
@@ -144,70 +150,102 @@ class A16 : public BaseProject {
 
 		DSCar.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMetalR},
+                    {3, TEXTURE, 0, &TMetalN},
 			});
 		DSApartment1.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSApartment2.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSApartment3.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSApartment4.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSBank1.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwellingStore1.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwellingStore2.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwellingStore8.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwelling1.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwelling12.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSDwelling13.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 		DSEntertainment6.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TCity}
+					{1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
 			});
 
 		DSEnv.init(this, &DSLMesh, {
 					{0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-					{1, TEXTURE, 0, &TGrass}
+					{1, TEXTURE, 0, &TGrass},
+                    {2, TEXTURE, 0, &TGrass},
+                    {3, TEXTURE, 0, &TGrass},
 			});
 
         DSRoad.init(this, &DSLMesh, {
                     {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCity}
+                    {1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMarbleR},
+                    {3, TEXTURE, 0, &TMarbleN},
             });
-        
+
         DSCoin.init(this, &DSLMesh, {
                     {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                    {1, TEXTURE, 0, &TCity}
+                    {1, TEXTURE, 0, &TCity},
+                    {2, TEXTURE, 0, &TMetalR},
+                    {3, TEXTURE, 0, &TMetalN},
             });
 
 		DSSplash.init(this, &DSLOverlay, {
@@ -257,6 +295,10 @@ class A16 : public BaseProject {
 		TCity.cleanup();
 		TSplash.cleanup();
         TGrass.cleanup();
+        TMetalR.cleanup();
+        TMetalN.cleanup();
+        TMarbleR.cleanup();
+        TMarbleN.cleanup();
 
 		MCar.cleanup();
 		MApartment1.cleanup();
@@ -366,6 +408,7 @@ class A16 : public BaseProject {
         DSEnv.bind(commandBuffer, currPipeline, 1, currentImage);
         vkCmdDrawIndexed(commandBuffer,
                          static_cast<uint32_t>(MEnv.indices.size()), 1, 0, 0, 0);
+
     }
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
@@ -552,6 +595,7 @@ class A16 : public BaseProject {
             uboCoin.mMat = World;
             uboCoin.nMat = glm::inverse(glm::transpose(World));
             DSCoin.map(currentImage, &uboCoin, sizeof(uboCoin), 0);
+
 
             /*Environment Asset*/
             World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
