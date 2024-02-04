@@ -65,3 +65,9 @@ const float carRotAccFactorForward = 3.5f;
 const float carRotAccFactorBackward = 1.0f;
 
 const float carRotEpsilon = glm::radians(1.5f);
+
+
+//names
+const int SCREEN = 0;
+const int FREE_CAMERA = 1;
+const int GAME = 2;

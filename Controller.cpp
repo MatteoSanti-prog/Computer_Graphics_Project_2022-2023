@@ -48,7 +48,7 @@ void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
     freeCamPosNew += freeMovSpeed * m.x * ux * deltaT;
     freeCamPosNew += freeMovSpeed * m.y * uy * deltaT;
     freeCamPosNew += freeMovSpeed * m.z * uz * deltaT;
-    
+
     /*Bind the elevation of the camera*/
     freeCamPosNew.y = freeCamPosNew.y < 0.5f ? 0.5f : freeCamPosNew.y;
 
@@ -76,7 +76,7 @@ void freeCam(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm:
     WorldMatrix = glm::translate(glm::mat4(1.0), CarPos) * glm::rotate(glm::mat4(1.0), CarYaw, glm::vec3(0, 1, 0));
 }
 
-/*GameLogic contains the logic to manage the movement and rotation of the car*/
+/*GameLogic contains the logic to manage the movement and rotation of the car and return the state of the game*/
 int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm::mat4& WorldMatrix, glm::vec3& CarPos, float& CarYaw, glm::vec3& CamPos, int& brakeOnOff) {
 
     /*Floating point variables used to store translational and rotational accelerations (and decelerations)*/
@@ -152,10 +152,10 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
         glLocalCarPos = carStartingPosition;
         glLocalCarYaw = carStartingDirection;
         glMovSpeed = 0.0f;
-        
+
         initializeCheckpoints();
         resetFreeCam();
-        return 0; //Reset gameState to 0 (SplashArt)
+        return SCREEN; //Reset gameState to 0 (SplashArt)
     }
 
     /*Update flag in order to know which color to use*/
@@ -168,7 +168,7 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
     else {
         brakeOnOff = 2;
     }
-        
+
     /*Create a World Matrix for the car*/
     WorldMatrix = glm::translate(glm::mat4(1.0), glLocalCarPos) * glm::rotate(glm::mat4(1.0), glLocalCarYaw, glm::vec3(0, 1, 0));
 
@@ -194,8 +194,8 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
     WorldMatrix = glm::translate(glm::mat4(1.0), glLocalCarPos) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f) + glLocalCarYaw, glm::vec3(0, 1, 0));
 
     glOldCarPos = glLocalCarPos;
-    
-    return 2;
+
+    return GAME;
 }
 
 /*Reset the game to the initial state when all the checkpoints have been collected*/
