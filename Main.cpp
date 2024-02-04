@@ -458,7 +458,7 @@ class A16 : public BaseProject {
 			break;
 		case 1:
             freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-            globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
+            globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(3, 5, 6));
             globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             globalUniformBlockDay.eyePos = CamPos;
             DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
