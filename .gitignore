@@ -3,3 +3,6 @@ compile.bat
 Main.exe
 Main.exe
 Main.obj
+shaders/compile.sh
+.DS_Store
+.DS_Store
