@@ -1,8 +1,6 @@
 #pragma once
 
 struct MeshUniformBlock {
-    alignas(4) float gamma;
-    alignas(4) float metallic;
     alignas(16) glm::mat4 mvpMat;
     alignas(16) glm::mat4 mMat;
     alignas(16) glm::mat4 nMat;

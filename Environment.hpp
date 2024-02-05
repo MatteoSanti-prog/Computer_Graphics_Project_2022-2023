@@ -35,7 +35,7 @@ void createEnvironment(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vId
 void createCoin(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
     /*Temp variables*/
     int i, total0, total1, total2, count = 0;
-    /*Radius and half height of the circles*/
+    /*Radius and half h of the circles*/
     float radiusExternal = 1.0f, radiusInternal = 0.7f, halfHOuter = 1.0f, halfHInner = 0.5f;
     /*Normal, UV and center points for each section*/
     glm::vec2 UVCoordinates = glm::vec2({0.9f, 0.4f});

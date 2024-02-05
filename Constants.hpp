@@ -9,10 +9,10 @@ const float farPlane = 1000.0f;
 
 
 //Environment
-const float h = 2.0f; //colliders height
+const float h = 2.0f; //colliders h
 
 
-//
+//Scaling factor and rotation speed of the coin
 const float scalingFactor = 4.0f;
 const float coinRotSpeed = glm::radians(45.0f);
 
@@ -34,7 +34,7 @@ const float freeCamStartingPitch = -0.0851274f;
 const glm::vec3 carStartingPosition = glm::vec3(-38.0f, 0.1, 4.0f);
 const float carStartingDirection = glm::radians(180.0f);
 
-/*Constants representing the height and the distance of the camera from the car*/
+/*Constants representing the h and the distance of the camera from the car*/
 const float gLCamHeight = 1.0f;
 const float gLCamDist = 5.0f;
 
