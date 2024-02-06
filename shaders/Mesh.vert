@@ -2,8 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(set = 1, binding = 0) uniform UniformBufferObject {
-	float gamma;
-    float metallic;
 	mat4 mvpMat;
 	mat4 mMat;
 	mat4 nMat;

@@ -12,7 +12,7 @@ const float farPlane = 1000.0f;
 const float h = 2.0f; //colliders height
 
 
-//
+//Scaling factor and rotation speed of the coin
 const float scalingFactor = 4.0f;
 const float coinRotSpeed = glm::radians(45.0f);
 

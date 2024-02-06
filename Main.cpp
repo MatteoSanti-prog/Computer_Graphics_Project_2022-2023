@@ -30,7 +30,7 @@ protected:
             DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
             DSCoin;
 
-    Texture TCity, TSplash, TGrass;
+    Texture TCity, TSplash, TGrass, TMetalRoughness, TMarbleRoughness;
 
     MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
     OverlayUniformBlock uboSplash;
@@ -50,22 +50,23 @@ protected:
         initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
         uniformBlocksInPool = 19;
-        texturesInPool = 17;
+        texturesInPool = 33;
 
         setsInPool = 19;
 
         Ar = (float)windowWidth / (float)windowHeight;
     }
 
-    void onWindowResize(int w, int h) {
-        Ar = (float)w / (float)h;
+    void onWindowResize(int w, int height) {
+        Ar = (float)w / (float)height;
     }
 
     void localInit() {
 
         DSLMesh.init(this, {
                 {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT},
+                {2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
         });
 
         DSLOverlay.init(this, {
@@ -136,6 +137,8 @@ protected:
         TCity.init(this, "textures/Textures_City.png");
         TSplash.init(this, "textures/initial_screen.png");
         TGrass.init(this, "textures/grass.png");
+        TMetalRoughness.init(this, "textures/Metals_10_met_rough_ao.png", VK_FORMAT_R8G8B8A8_UNORM);
+        TMarbleRoughness.init(this, "textures/Marble_08_met_rough_ao.png", VK_FORMAT_R8G8B8A8_UNORM);
 
         gameState = SCREEN;
 
@@ -150,70 +153,86 @@ protected:
 
         DSCar.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMetalRoughness}
         });
         DSApartment1.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSApartment2.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSApartment3.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSApartment4.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSBank1.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwellingStore1.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwellingStore2.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwellingStore8.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwelling1.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwelling12.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSDwelling13.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
         DSEntertainment6.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
 
         DSEnv.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TGrass}
+                {1, TEXTURE, 0, &TGrass},
+                {2, TEXTURE, 0, &TGrass}
         });
 
         DSRoad.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMarbleRoughness}
         });
 
         DSCoin.init(this, &DSLMesh, {
                 {0, UNIFORM, sizeof(MeshUniformBlock), nullptr},
-                {1, TEXTURE, 0, &TCity}
+                {1, TEXTURE, 0, &TCity},
+                {2, TEXTURE, 0, &TMetalRoughness}
         });
 
         DSSplash.init(this, &DSLOverlay, {
@@ -263,6 +282,8 @@ protected:
         TCity.cleanup();
         TSplash.cleanup();
         TGrass.cleanup();
+        TMetalRoughness.cleanup();
+        TMarbleRoughness.cleanup();
 
         MCar.cleanup();
         MApartment1.cleanup();
@@ -423,7 +444,7 @@ protected:
                 break;
             case FREE_CAMERA:
                 freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
-                globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(1, 1, 0));
+                globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(3, 5, 6));
                 globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
                 globalUniformBlockDay.eyePos = CamPos;
                 DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
@@ -456,7 +477,6 @@ protected:
 
         if(gameState != SCREEN){
 
-            uboCar.gamma = 360.0f; uboCar.metallic = 1.0f;
             uboCar.mvpMat = Prj * View * World;
             uboCar.mMat = World;
             uboCar.nMat = glm::inverse(glm::transpose(World));
@@ -464,35 +484,30 @@ protected:
 
             /*Assets in the GFHE section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment1.gamma = 180.0f; uboApartment1.metallic = 0.3f;
             uboApartment1.mvpMat = Prj * View * World;
             uboApartment1.mMat = World;
             uboApartment1.nMat = glm::inverse(glm::transpose(World));
             DSApartment1.map(currentImage, &uboApartment1, sizeof(uboApartment1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 6.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore1.gamma = 180.0f; uboDwellingStore1.metallic = 0.3f;
             uboDwellingStore1.mvpMat = Prj * View * World;
             uboDwellingStore1.mMat = World;
             uboDwellingStore1.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore1.map(currentImage, &uboDwellingStore1, sizeof(uboDwellingStore1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 11.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore8.gamma = 180.0f; uboDwellingStore8.metallic = 0.3f;
             uboDwellingStore8.mvpMat = Prj * View * World;
             uboDwellingStore8.mMat = World;
             uboDwellingStore8.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore8.map(currentImage, &uboDwellingStore8, sizeof(uboDwellingStore8), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 25.5f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwellingStore2.gamma = 180.0f; uboDwellingStore2.metallic = 0.3f;
             uboDwellingStore2.mvpMat = Prj * View * World;
             uboDwellingStore2.mMat = World;
             uboDwellingStore2.nMat = glm::inverse(glm::transpose(World));
             DSDwellingStore2.map(currentImage, &uboDwellingStore2, sizeof(uboDwellingStore2), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 18.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling12.gamma = 180.0f; uboDwelling12.metallic = 0.3f;
             uboDwelling12.mvpMat = Prj * View * World;
             uboDwelling12.mMat = World;
             uboDwelling12.nMat = glm::inverse(glm::transpose(World));
@@ -500,28 +515,24 @@ protected:
 
             /*Assets in the RJQG section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(12.5f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment3.gamma = 180.0f; uboApartment3.metallic = 0.3f;
             uboApartment3.mvpMat = Prj * View * World;
             uboApartment3.mMat = World;
             uboApartment3.nMat = glm::inverse(glm::transpose(World));
             DSApartment3.map(currentImage, &uboApartment3, sizeof(uboApartment3), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(5.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboApartment2.gamma = 180.0f; uboApartment2.metallic = 0.3f;
             uboApartment2.mvpMat = Prj * View * World;
             uboApartment2.mMat = World;
             uboApartment2.nMat = glm::inverse(glm::transpose(World));
             DSApartment2.map(currentImage, &uboApartment2, sizeof(uboApartment2), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-2.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboBank1.gamma = 180.0f; uboBank1.metallic = 0.3f;
             uboBank1.mvpMat = Prj * View * World;
             uboBank1.mMat = World;
             uboBank1.nMat = glm::inverse(glm::transpose(World));
             DSBank1.map(currentImage, &uboBank1, sizeof(uboBank1), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling13.gamma = 180.0f; uboDwelling13.metallic = 0.3f;
             uboDwelling13.mvpMat = Prj * View * World;
             uboDwelling13.mMat = World;
             uboDwelling13.nMat = glm::inverse(glm::transpose(World));
@@ -529,21 +540,18 @@ protected:
 
             /*Assets in the OPKN section*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboEntertainment6.gamma = 180.0f; uboEntertainment6.metallic = 0.3f;
             uboEntertainment6.mvpMat = Prj * View * World;
             uboEntertainment6.mMat = World;
             uboEntertainment6.nMat = glm::inverse(glm::transpose(World));
             DSEntertainment6.map(currentImage, &uboEntertainment6, sizeof(uboEntertainment6), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f));
-            uboApartment4.gamma = 180.0f; uboApartment4.metallic = 0.3f;
             uboApartment4.mvpMat = Prj * View * World;
             uboApartment4.mMat = World;
             uboApartment4.nMat = glm::inverse(glm::transpose(World));
             DSApartment4.map(currentImage, &uboApartment4, sizeof(uboApartment4), 0);
 
             World = glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) * glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            uboDwelling1.gamma = 180.0f; uboDwelling1.metallic = 0.3f;
             uboDwelling1.mvpMat = Prj * View * World;
             uboDwelling1.mMat = World;
             uboDwelling1.nMat = glm::inverse(glm::transpose(World));
@@ -551,7 +559,6 @@ protected:
 
             /*Road Asset*/
             World = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-            uboRoad.gamma = 180.0f; uboRoad.metallic = 0.3f;
             uboRoad.mvpMat = Prj * View * World;
             uboRoad.mMat = World;
             uboRoad.nMat = glm::inverse(glm::transpose(World));
@@ -562,7 +569,6 @@ protected:
             World = glm::translate(glm::mat4(1.0), getcurrentCheckpointPos()) * glm::rotate(glm::mat4(1.0), CoinYaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
                     glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
                     glm::scale(glm::mat4(1.0), glm::vec3(1.0f, 0.15f, 1.0f));
-            uboCoin.gamma = 360.0f; uboCoin.metallic = 1.0f;
             uboCoin.mvpMat = Prj * View * World;
             uboCoin.mMat = World;
             uboCoin.nMat = glm::inverse(glm::transpose(World));
@@ -571,7 +577,6 @@ protected:
             /*Environment Asset*/
             World = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
                     glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
-            uboEnv.gamma = 180.0f; uboEnv.metallic = 0.0f;
             uboEnv.mvpMat = Prj * View * World;
             uboEnv.mMat = World;
             uboEnv.nMat = glm::inverse(glm::transpose(World));
