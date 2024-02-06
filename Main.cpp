@@ -12,9 +12,20 @@ protected:
 
     float Ar;
 
-    //timer variables
+    //timer variables /**/
     float timer = 0;
-    int tic = 0;
+    //timer /**/
+    Model<VertexOverlay> M1timer[8];
+    Model<VertexOverlay> M2timer[8];
+    float w = 0.004; //segment wide
+    float timer_pos_x[8] = {-0.87f,-0.87f,-0.83f,-0.83f,-0.85f,-0.85f,-0.85f,-0.85f}; /**/
+    float timer_pos_y[8] = {-0.87f,-0.83f,-0.87f,-0.83f,-0.89f,-0.85f,-0.81f,-0.85f}; /**/
+    float delta_x[8] = {w,     w,     w,     w,     0.025f,0.025f,0.025f,w};
+    float delta_y[8] = {0.025f,0.025f,0.025f,0.025f,w,     w,     w,     0.045f};
+    std::string x1 = "00000000";
+    std::string x2 = "00000000";
+    float digit_distance = 0.08f;
+    DescriptorSet DS1Timer[8], DS2Timer[8]; /**/
 
     DescriptorSetLayout DSLDay, DSLNight, DSLMesh, DSLOverlay;
 
@@ -30,7 +41,7 @@ protected:
             DSDwellingStore2, DSDwellingStore8, DSDwelling1, DSDwelling12, DSDwelling13, DSEntertainment6, DSEnv, DSRoad, DSSplash,
             DSCoin;
 
-    Texture TCity, TSplash, TGrass, TMetalRoughness, TMarbleRoughness;
+    Texture TCity, TSplash, TGrass, TMetalRoughness, TMarbleRoughness, TTimer;
 
     MeshUniformBlock uboCar, uboApartment1, uboApartment2, uboApartment3, uboApartment4, uboBank1, uboDwellingStore1, uboDwellingStore2, uboDwellingStore8, uboDwelling1, uboDwelling12, uboDwelling13, uboEntertainment6, uboEnv, uboRoad, uboCoin;
     OverlayUniformBlock uboSplash;
@@ -49,10 +60,9 @@ protected:
         windowResizable = GLFW_TRUE;
         initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
-        uniformBlocksInPool = 19;
-        texturesInPool = 33;
-
-        setsInPool = 19;
+        uniformBlocksInPool = 50; //19 17 19 /**/
+        texturesInPool = 50;
+        setsInPool = 50;
 
         Ar = (float)windowWidth / (float)windowHeight;
     }
@@ -128,6 +138,22 @@ protected:
         MSplash.indices = { 0, 1, 2,    1, 2, 3 };
         MSplash.initMesh(this, &VOverlay);
 
+        for(int i = 0; i < 8; i++){ /**/
+            M1timer[i].vertices = {{{ timer_pos_x[i] - delta_x[i], timer_pos_y[i] - delta_y[i]}, {0.001f, 0.001f}},
+                                   {{timer_pos_x[i]-delta_x[i], timer_pos_y[i]+delta_y[i]},      {0.001f, 0.999f}},
+                                   {{timer_pos_x[i]+delta_x[i], timer_pos_y[i]-delta_y[i]},      {0.999f, 0.001f}},
+                                   {{ timer_pos_x[i]+delta_x[i], timer_pos_y[i]+delta_y[i]},     {0.999f, 0.999f}} };
+            M1timer[i].indices = {0, 1, 2, 1, 2, 3 };
+            M1timer[i].initMesh(this, &VOverlay);
+
+            M2timer[i].vertices = {{{ timer_pos_x[i] - delta_x[i]+digit_distance, timer_pos_y[i] - delta_y[i]}, {0.001f, 0.001f}},
+                                   {{timer_pos_x[i]-delta_x[i]+digit_distance, timer_pos_y[i]+delta_y[i]},      {0.001f, 0.999f}},
+                                   {{timer_pos_x[i]+delta_x[i]+digit_distance, timer_pos_y[i]-delta_y[i]},      {0.999f, 0.001f}},
+                                   {{ timer_pos_x[i]+delta_x[i]+digit_distance, timer_pos_y[i]+delta_y[i]},     {0.999f, 0.999f}} };
+            M2timer[i].indices = {0, 1, 2, 1, 2, 3 };
+            M2timer[i].initMesh(this, &VOverlay);
+        }/**/
+
         createEnvironment(MEnv.vertices, MEnv.indices);
         MEnv.initMesh(this, &VMesh);
 
@@ -139,6 +165,7 @@ protected:
         TGrass.init(this, "textures/grass.png");
         TMetalRoughness.init(this, "textures/Metals_10_met_rough_ao.png", VK_FORMAT_R8G8B8A8_UNORM);
         TMarbleRoughness.init(this, "textures/Marble_08_met_rough_ao.png", VK_FORMAT_R8G8B8A8_UNORM);
+        TTimer.init(this, "textures/red.png"); /**/
 
         gameState = SCREEN;
 
@@ -239,6 +266,18 @@ protected:
                 {0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
                 {1, TEXTURE, 0, &TSplash}
         });
+        /**/
+        for(int i = 0; i < 8; i++){
+            DS1Timer[i].init(this, &DSLOverlay, {
+                    {0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
+                    {1, TEXTURE, 0, &TTimer}
+            });
+            DS2Timer[i].init(this, &DSLOverlay, {
+                    {0, UNIFORM, sizeof(OverlayUniformBlock), nullptr},
+                    {1, TEXTURE, 0, &TTimer}
+            });
+        }
+        /**/
 
         DSDay.init(this, &DSLDay, {
                 {0, UNIFORM, sizeof(GlobalUniformBlockDay), nullptr}
@@ -280,6 +319,7 @@ protected:
     void localCleanup() {
 
         TCity.cleanup();
+        TTimer.cleanup(); /**/
         TSplash.cleanup();
         TGrass.cleanup();
         TMetalRoughness.cleanup();
@@ -300,6 +340,10 @@ protected:
         MCoin.cleanup();
         MEnv.cleanup();
         MSplash.cleanup();
+        for(int i = 0; i < 8; i++) { /**/
+            M1timer[i].cleanup();
+            M2timer[i].cleanup();
+        }/**/
 
         DSLMesh.cleanup();
         DSLOverlay.cleanup();
@@ -403,12 +447,75 @@ protected:
         vkCmdDrawIndexed(commandBuffer,
                          static_cast<uint32_t>(MSplash.indices.size()), 1, 0, 0, 0);
 
+        for(int i = 0; i < 8; i++){ /**/
+            M1timer[i].bind(commandBuffer);
+            DS1Timer[i].bind(commandBuffer, POverlay, 0, currentImage);
+            vkCmdDrawIndexed(commandBuffer,
+                             static_cast<uint32_t>(M2timer[i].indices.size()), 1, 0, 0, 0);
+            M2timer[i].bind(commandBuffer);
+            DS2Timer[i].bind(commandBuffer, POverlay, 0, currentImage);
+            vkCmdDrawIndexed(commandBuffer,
+                             static_cast<uint32_t>(M2timer[i].indices.size()), 1, 0, 0, 0);
+
+        }/**/
+
         /*Depending on the state of the game we choose which pipeline to use*/
         if (gameState == FREE_CAMERA) {
             switchPipeline(commandBuffer, currentImage, PMeshDay, DSDay);
         }
         if (gameState == GAME) {
             switchPipeline(commandBuffer, currentImage, PMeshNight, DSNight);
+        }
+    }
+
+    //associate a sequence of bits for each digit from 0 to 9
+    //the value of each bit switch on or off the segments that compose the timer on screen
+    //t is the value of the timer, v indicate which digit of the timer need to be translated
+    void codeTime(std::string *str, int t, int v){
+        std::string code;
+        int x = 0;
+        switch(v){
+            case 2:
+                x = t % 10;
+                break;
+            case 1:
+                x = ((t % 100) - (t % 10))/10; //take the second digit
+                break;
+            default:
+                x = 0;
+        }
+
+        switch(x) {
+            case 0:
+                *str = "11111010";
+                return;
+            case 1:
+                *str = "00000001";
+                return;
+            case 2:
+                *str = "01101110";
+                return;
+            case 3:
+                *str = "00111110";
+                return;
+            case 4:
+                *str = "10110100";
+                return;
+            case 5:
+                *str = "10011110";
+                return;
+            case 6:
+                *str = "11011110";
+                return;
+            case 7:
+                *str = "00111000";
+                return;
+            case 8:
+                *str = "11111110";
+                return;
+            case 9:
+                *str = "10111110";
+                return;
         }
     }
 
@@ -443,6 +550,7 @@ protected:
                 }
                 break;
             case FREE_CAMERA:
+                timer = 0; /**/
                 freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
                 globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(3, 5, 6));
                 globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -455,11 +563,11 @@ protected:
                 }
                 break;
             case GAME:
+                /**/
                 //update timer
                 timer += std::chrono::duration_cast<std::chrono::duration<float>>(delta.time_since_epoch()).count() *std::pow(10, -11);
-                tic++;
-                if(tic%100 == 0)
-                    std::cout << "timer: " << timer << std::endl;
+                //std::cout << "timer: " << timer << std::endl;
+                /**/
 
                 gameState = gameLogic(deltaT, m, r, View, World, CarPos, CarYaw, CamPos, brakeOnOff);
 
@@ -585,6 +693,20 @@ protected:
 
         uboSplash.visible = (gameState == SCREEN) ? 1.0f : 0.0f;
         DSSplash.map(currentImage, &uboSplash, sizeof(uboSplash), 0);
+
+        /**/
+        //display timer
+        //the decimal part of timer is ignored
+        codeTime(&x1, timer, 1);
+        codeTime(&x2, timer, 2);
+        for(int i = 0; i < 8; i++) {
+            uboSplash.visible = (x1[i] == '1') ? 1 : 0;
+            DS1Timer[i].map(currentImage, &uboSplash, sizeof(uboSplash), 0);
+
+            uboSplash.visible = (x2[i] == '1') ? 1 : 0;
+            DS2Timer[i].map(currentImage, &uboSplash, sizeof(uboSplash), 0);
+        }
+        /**/
     }
 };
 
