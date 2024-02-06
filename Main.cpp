@@ -60,7 +60,7 @@ protected:
         windowResizable = GLFW_TRUE;
         initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
 
-        uniformBlocksInPool = 50; //19 17 19 /**/
+        uniformBlocksInPool = 50; //19 33 19 /**/
         texturesInPool = 50;
         setsInPool = 50;
 
@@ -314,6 +314,10 @@ protected:
         DSSplash.cleanup();
         DSDay.cleanup();
         DSNight.cleanup();
+        for(int i = 0; i < 8; i++) {
+            DS1Timer[i].cleanup();
+            DS2Timer[i].cleanup();
+        }/**/
     }
 
     void localCleanup() {
@@ -543,6 +547,7 @@ protected:
 
         switch (gameState) {
             case SCREEN:
+                timer = 0;
                 if (handleFire) {
                     gameState = FREE_CAMERA;
                     initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
@@ -550,7 +555,6 @@ protected:
                 }
                 break;
             case FREE_CAMERA:
-                timer = 0; /**/
                 freeCam(deltaT, m, r, View, World, CarPos, CarYaw, CamPos);
                 globalUniformBlockDay.lightDir = glm::normalize(glm::vec3(3, 5, 6));
                 globalUniformBlockDay.lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -577,6 +581,9 @@ protected:
                                                            (brakeOnOff == 1) ? glm::vec4(1.0f) : glm::vec4(0.0f);
                 globalUniformBlockNight.eyePos = CamPos;
                 DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
+                if (timer >= 100) {
+                    gameState = SCREEN;
+                }
                 break;
         }
 
