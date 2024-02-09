@@ -149,12 +149,7 @@ int gameLogic(float deltaT, glm::vec3 m, glm::vec3 r, glm::mat4& ViewMatrix, glm
 
     /*Check the checkpoints*/
     if(trackCheckpoints(glLocalCarPos)){
-        glLocalCarPos = carStartingPosition;
-        glLocalCarYaw = carStartingDirection;
-        glMovSpeed = 0.0f;
-
-        initializeCheckpoints();
-        resetFreeCam();
+        resetGameLogic();
         return SCREEN; //Reset gameState to 0 (SplashArt)
     }
 
@@ -204,4 +199,18 @@ void resetFreeCam(){
     freeCamPosNew = freeCamStartingPosition;
     freeCamYaw = freeCamStartingYaw;
     freeCamPitch = freeCamStartingPitch;
+}
+
+void resetGameLogic() {
+    glLocalCarYaw = carStartingDirection;
+    glLocalCamPos = carStartingPosition;
+    glLocalCarPos = carStartingPosition;
+    glOldCarPos = carStartingPosition;
+    glCamPitch = glm::radians(10.0f);
+    glCamPosOld = carStartingPosition;
+    glMovSpeed = 0.0f;
+    glRotSpeed = glm::radians(0.0f);
+
+    initializeCheckpoints();
+    resetFreeCam();
 }

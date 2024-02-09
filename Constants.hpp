@@ -1,8 +1,49 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-// Camera
+//Scaling factor and rotation speed of the coin
+const int numberAssets = 12;
+const int rectanglesPerTimer = 8;
+const float scalingFactor = 4.0f;
+const float coinRotSpeed = glm::radians(45.0f);
+
+//World matrices
+const glm::mat4 WorldRoad = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.2f, 0.0f)) *
+                            glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+
+const glm::mat4 WorldEnv = glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+                           glm::scale(glm::mat4(1.0), glm::vec3(scalingFactor));
+
+
+const glm::mat4 WorldAsset[12] = {
+        glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 0.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 6.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 11.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 25.5f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(24.0f, 0.0f, 18.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(12.5f, 0.0f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(5.0f, 0.0f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(-2.0f, 0.0f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(-11.0f, 0.0f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -19.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, -7.0f)),
+        glm::translate(glm::mat4(1.0), glm::vec3(-26.0f, 0.0f, 4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+};
+
+//Camera
 const float fovy = glm::radians(45.0f);
 const float nearPlane = 0.1f;
 const float farPlane = 1000.0f;
@@ -10,11 +51,6 @@ const float farPlane = 1000.0f;
 
 //Environment
 const float h = 2.0f; //colliders height
-
-
-//Scaling factor and rotation speed of the coin
-const float scalingFactor = 4.0f;
-const float coinRotSpeed = glm::radians(45.0f);
 
 
 //Controller - free cam
