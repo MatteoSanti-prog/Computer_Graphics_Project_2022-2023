@@ -99,7 +99,8 @@ void createCoin(std::vector<VertexMesh> &vPos, std::vector<uint32_t> &vIdx) {
         count += 1;
     }
     total1 = count;
-    
+
+
     /*From here we create the lateral surfaces*/
     pointExternalUp = glm::vec3(radiusExternal, halfHOuter, 0.0f);
     pointExternalBottom = glm::vec3(radiusExternal, -halfHOuter, 0.0f);
