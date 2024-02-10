@@ -107,3 +107,4 @@ const float carRotEpsilon = glm::radians(1.5f);
 const int SCREEN = 0;
 const int FREE_CAMERA = 1;
 const int GAME = 2;
+const int INITIAL = 3;

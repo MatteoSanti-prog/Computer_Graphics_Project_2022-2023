@@ -47,6 +47,7 @@ protected:
     float digit_distance = 0.08f;
 
     int gameState;
+    int previousGameState = INITIAL;
     int brakeOnOff;
 
     void setWindowParameters() {
@@ -434,6 +435,7 @@ protected:
         switch (gameState) {
             case SCREEN:
                 if (handleFire) {
+                    previousGameState = gameState;
                     gameState = FREE_CAMERA;
                     initialBackgroundColor = { 0.0f, 0.4f, 1.0f, 1.0f };
                     RebuildPipeline();
@@ -447,6 +449,7 @@ protected:
                 globalUniformBlockDay.eyePos = CamPos;
                 DSDay.map(currentImage, &globalUniformBlockDay, sizeof(globalUniformBlockDay), 0);
                 if (handleFire) {
+                    previousGameState = gameState;
                     gameState = GAME;
                     initialBackgroundColor = { 0.0f, 0.005f, 0.01f, 1.0f };
                     RebuildPipeline();
@@ -470,6 +473,7 @@ protected:
                 DSNight.map(currentImage, &globalUniformBlockNight, sizeof(globalUniformBlockNight), 0);
                 if (timer >= 100) {
                     resetGameLogic();
+                    previousGameState = gameState;
                     gameState = SCREEN;
                 }
                 break;
@@ -527,10 +531,12 @@ protected:
         codeTime(&x1, timer, 1);
         codeTime(&x2, timer, 2);
         for(int i = 0; i < rectanglesPerTimer; i++) {
-            uboOverlay.visible = (x1[i] == '1') ? 1 : 0;
+            uboOverlay.visible = (gameState == FREE_CAMERA || (gameState == SCREEN && previousGameState == INITIAL)) ? 0 :
+                                 ((x1[i] == '1') ? 1 : 0);
             DS1Timer[i].map(currentImage, &uboOverlay, sizeof(uboOverlay), 0);
 
-            uboOverlay.visible = (x2[i] == '1') ? 1 : 0;
+            uboOverlay.visible = (gameState == FREE_CAMERA || (gameState == SCREEN && previousGameState == INITIAL)) ? 0 :
+                                 ((x2[i] == '1') ? 1 : 0);
             DS2Timer[i].map(currentImage, &uboOverlay, sizeof(uboOverlay), 0);
         }
     }
